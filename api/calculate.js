@@ -1,15 +1,29 @@
 // ChinaFit AI 核心计算引擎 (Node.js 后端 - Vercel Serverless Function)
 // 使用 CommonJS 导出，确保与 Vercel 默认环境兼容
+// 接入 DeepSeek AI 进行智能尺码推理
 
-module.exports = function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(200).send('ChinaFit AI core engine is running! Please use POST request.');
+module.exports = async function handler(req, res) {
+    // 设置 CORS 头（便于本地调试）
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // 处理预检请求
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
+    // 只接受 POST 请求
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed. Please use POST.' });
+    }
+
+    // 获取前端发送的参数（保持原有结构）
     const { category, val1, val2 } = req.body || {};
     const numericVal1 = Number(val1);
     const numericVal2 = Number(val2);
 
+    // 基础参数校验
     if (!category || !['shoes', 'tops', 'pants'].includes(category)) {
         return res.status(400).json({ error: 'Invalid category. Must be shoes, tops, or pants.' });
     }
@@ -17,113 +31,91 @@ module.exports = function handler(req, res) {
         return res.status(400).json({ error: 'Body measurements must be positive numbers.' });
     }
 
-    let result = {};
-
-    switch (category) {
-        case 'shoes': {
-            const footLength = numericVal1;
-            const footWidth = numericVal2;
-
-            let eurSize, usSize, fitAdvice, insights;
-
-            if (footLength <= 245) {
-                eurSize = "39 EUR"; usSize = "6.5 US";
-            } else if (footLength <= 250) {
-                eurSize = "40 EUR"; usSize = "7.5 US";
-            } else if (footLength <= 255) {
-                eurSize = "41 EUR"; usSize = "8.0 US";
-            } else if (footLength <= 260) {
-                eurSize = "42 EUR"; usSize = "8.5 US";
-            } else if (footLength <= 265) {
-                eurSize = "43 EUR"; usSize = "9.5 US";
-            } else if (footLength <= 275) {
-                eurSize = "44 EUR"; usSize = "10.0 US";
-            } else {
-                eurSize = "45+ EUR"; usSize = "11.0+ US";
-            }
-
-            if (footWidth > 100) {
-                fitAdvice = "Relaxed fit (size up half a size)";
-                insights = `Detected foot width ${footWidth}mm (wide foot type). Some sneaker models run narrow, we recommend going half a size up to avoid pressure.`;
-            } else if (footWidth < 85) {
-                fitAdvice = "Narrow fit (size down half a size)";
-                insights = `Foot width ${footWidth}mm is narrow. Regular sizes may feel loose; consider going half a size down or choosing a narrow last.`;
-            } else {
-                fitAdvice = "Standard fit (buy regular size)";
-                insights = `Foot length ${footLength}mm and width ${footWidth}mm perfectly match the standard Asian foot shape. You can safely order your usual size.`;
-            }
-
-            result = {
-                size: `${eurSize} / ${usSize}`,
-                fit: fitAdvice,
-                confidence: "99.2%",
-                extra: insights
-            };
-            break;
-        }
-
-        case 'tops': {
-            const height = numericVal1;
-            const weight = numericVal2;
-
-            let topSize, fitAdvice, insights;
-
-            if (weight < 60) {
-                topSize = "S (CN 170/88A)";
-                fitAdvice = "Slim Fit";
-            } else if (weight < 70) {
-                topSize = "M (CN 175/92A)";
-                fitAdvice = "Regular Fit";
-            } else if (weight < 80) {
-                topSize = "L (CN 180/96A)";
-                fitAdvice = "Oversized Street Fit";
-            } else {
-                topSize = "XL+ (CN 185/104A)";
-                fitAdvice = "Relaxed Fit";
-            }
-
-            insights = `Height ${height}cm, weight ${weight}kg. Asian sizes often run small; this recommendation ensures proper shoulder and length fit.`;
-            result = {
-                size: topSize,
-                fit: fitAdvice,
-                confidence: "98.5%",
-                extra: insights
-            };
-            break;
-        }
-
-        case 'pants': {
-            const height = numericVal1;
-            const waist = numericVal2;
-
-            let pantsSize, fitAdvice, insights;
-
-            if (waist >= 90) {
-                pantsSize = "34 (US) / 88cm Waist";
-                fitAdvice = "Loose Straight";
-            } else if (waist >= 80) {
-                pantsSize = "32 (US) / 82cm Waist";
-                fitAdvice = "Straight Comfort";
-            } else if (waist >= 72) {
-                pantsSize = "31 (US) / 78cm Waist";
-                fitAdvice = "Slim Straight";
-            } else {
-                pantsSize = "30 (US) / 76cm Waist";
-                fitAdvice = "Slim Tapered";
-            }
-
-            insights = `Waist ${waist}cm, height ${height}cm. Standard inseam recommended; if height over 180cm, consider extended length.`;
-            result = {
-                size: pantsSize,
-                fit: fitAdvice,
-                confidence: "96.0%",
-                extra: insights
-            };
-            break;
-        }
+    // 检查 DeepSeek API Key 是否存在
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+        console.error('DEEPSEEK_API_KEY is not set in Vercel environment variables.');
+        return res.status(500).json({ error: 'DeepSeek API key is not configured on the server.' });
     }
 
-    setTimeout(() => {
-        res.status(200).json(result);
-    }, 300);
+    // 根据 category 构建给 DeepSeek 的提示词
+    let promptContext = '';
+    if (category === 'shoes') {
+        promptContext = `The user is shopping for shoes on a Chinese platform. 
+        - Foot length: ${numericVal1} mm
+        - Foot width: ${numericVal2} mm
+        Please recommend the appropriate Chinese shoe size, including EUR and US equivalents.`;
+    } else if (category === 'tops') {
+        promptContext = `The user is shopping for tops/outerwear on a Chinese platform.
+        - Height: ${numericVal1} cm
+        - Weight: ${numericVal2} kg
+        Please recommend the appropriate Chinese clothing size (e.g., S, M, L, XL) and note that Chinese sizes tend to run small.`;
+    } else if (category === 'pants') {
+        promptContext = `The user is shopping for pants on a Chinese platform.
+        - Height: ${numericVal1} cm
+        - Waist circumference: ${numericVal2} cm
+        Please recommend the appropriate Chinese pants size, including US waist size and fit type.`;
+    }
+
+    const prompt = `You are an expert AI fashion and sizing consultant for international shoppers buying from Chinese platforms (e.g., Taobao, JD, Poizon/Dewu).
+
+    ${promptContext}
+
+    Important: Respond entirely in English. Provide a clear JSON object with the following keys:
+    - "recommendedSize": string (e.g., "42 EUR / 8.5 US" or "L (CN 180/96A)")
+    - "confidence": string (e.g., "95%")
+    - "fitAdvice": string (e.g., "Standard fit, buy regular size")
+    - "insights": string (detailed explanation referencing the user's measurements and Chinese sizing characteristics)
+
+    Ensure the JSON is valid and contains no additional text outside the JSON.`;
+
+    try {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    { role: 'system', content: 'You are a helpful sizing assistant. Always output valid JSON.' },
+                    { role: 'user', content: prompt }
+                ],
+                response_format: { type: 'json_object' },
+                temperature: 0.3,
+                max_tokens: 500
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('DeepSeek API error:', data);
+            throw new Error(data.error?.message || 'Failed to call DeepSeek API');
+        }
+
+        // 解析 DeepSeek 返回的内容
+        const aiContent = data.choices[0].message.content;
+        let aiResult;
+        try {
+            aiResult = JSON.parse(aiContent);
+        } catch (parseError) {
+            console.error('Failed to parse DeepSeek JSON response:', aiContent);
+            throw new Error('Invalid response format from AI engine.');
+        }
+
+        // 返回标准格式给前端
+        return res.status(200).json({
+            success: true,
+            size: aiResult.recommendedSize,
+            fit: aiResult.fitAdvice,
+            confidence: aiResult.confidence,
+            extra: aiResult.insights
+        });
+
+    } catch (error) {
+        console.error('AI Calculation Error:', error);
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
 };
