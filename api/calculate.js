@@ -131,7 +131,8 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
 - Avoid random characters, symbols, or formatting artifacts.
 - Ensure all measurement units are clear and consistent.
-- Keep the response professional, concise, and actionable.`;
+- Keep the response professional, concise, and actionable.
+- The base recommendation from our system is: ${baseResult.recommendedSize}. Please ensure your "Precise Size Conversion" section uses the same size values as the base recommendation to avoid inconsistency. Do not introduce a different size.`;
 
         const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
             method: 'POST',
