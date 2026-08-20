@@ -8,7 +8,6 @@ module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-premium-token');
   
-    // 处理预检请求
     if (req.method === 'OPTIONS') {
       return res.status(200).end();
     }
@@ -28,16 +27,15 @@ module.exports = async function handler(req, res) {
   
       if (category === 'shoes') {
         const fl = parseFloat(footLength) || 260;
-        let euSize;
-        if (fl <= 245) euSize = 39;
-        else if (fl <= 250) euSize = 40;
-        else if (fl <= 255) euSize = 41;
-        else if (fl <= 260) euSize = 42;
-        else if (fl <= 265) euSize = 43;
-        else if (fl <= 275) euSize = 44;
-        else euSize = 45;
+        let euSize, usSize;
+        if (fl <= 245) { euSize = 39; usSize = '6.5'; }
+        else if (fl <= 250) { euSize = 40; usSize = '7.5'; }
+        else if (fl <= 255) { euSize = 41; usSize = '8.0'; }
+        else if (fl <= 260) { euSize = 42; usSize = '8.5'; }
+        else if (fl <= 265) { euSize = 43; usSize = '9.5'; }
+        else if (fl <= 275) { euSize = 44; usSize = '10.0'; }
+        else { euSize = 45; usSize = '11.0'; }
   
-        const usSize = (euSize - 33).toFixed(1);
         baseResult = {
           recommendedSize: `EU ${euSize} / US ${usSize}`,
           confidence: '88%',
@@ -76,7 +74,6 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid category. Must be shoes, tops, or pants.' });
       }
   
-      // 非 Pro 用户，只返回基础结果
       if (!isPro) {
         return res.status(200).json({
           isPro: false,
@@ -112,7 +109,7 @@ module.exports = async function handler(req, res) {
   - Waist: ${waist || 'N/A'} cm`;
       }
   
-      const prompt = `You are a professional cross-border fashion sizing expert specializing in Chinese e-commerce platforms (Taobao, JD.com, Poizon/Dewu, 1688, Weidian) for international buyers.
+      const prompt = `You are a professional cross-border fashion sizing expert specializing in Chinese e-commerce platforms for international buyers.
   ${promptContext}
   - Target Gender: ${gender}
   
@@ -121,7 +118,14 @@ module.exports = async function handler(req, res) {
   2. **Platform Specific Fit Warnings** (Taobao/1688 sizing vs Poizon streetwear sizing).
   3. **Key Measurements to Check** (e.g. Chest/Shoulder/Insole in cm).
   4. **Tailored Advice** (Shrinkage risk, loose vs slim cut recommendation).
-  Keep it professional, encouraging, and actionable.`;
+  
+  **CRITICAL RULES**:
+  - Respond entirely in English. Do NOT include any Chinese characters, pinyin, or non-English scripts.
+  - Only mention these platforms: Taobao, JD.com, Poizon/Dewu, 1688. Do not mention any other platforms.
+  - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
+  - Avoid random characters, symbols, or formatting artifacts.
+  - Ensure all measurement units are clear and consistent.
+  - Keep the response professional, concise, and actionable.`;
   
       const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
@@ -132,7 +136,7 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
-            { role: 'system', content: 'You are ChinaFit AI sizing expert.' },
+            { role: 'system', content: 'You are ChinaFit AI sizing expert. Always output valid English markdown only.' },
             { role: 'user', content: prompt }
           ],
           temperature: 0.6,
