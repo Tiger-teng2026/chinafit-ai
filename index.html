@@ -31,7 +31,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 深度分析排版样式 */
         .markdown-content h1 { font-size: 1.3rem !important; font-weight: 800 !important; color: #ffffff !important; margin: 1.2rem 0 0.6rem 0 !important; }
         .markdown-content h2 { font-size: 1.15rem !important; font-weight: 700 !important; color: #f87171 !important; margin: 1.4rem 0 0.6rem 0 !important; border-bottom: 1px solid #334155 !important; padding-bottom: 0.4rem !important; }
         .markdown-content h3 { font-size: 1rem !important; font-weight: 600 !important; color: #e2e8f0 !important; margin: 1.1rem 0 0.4rem 0 !important; }
@@ -56,8 +55,8 @@
 
         function App() {
             const [activeTab, setActiveTab] = useState('shoes');
-            const [inputVal1, setInputVal1] = useState(260); // 脚长或身高
-            const [inputVal2, setInputVal2] = useState(95);  // 脚宽或体重/腰围
+            const [inputVal1, setInputVal1] = useState(260);
+            const [inputVal2, setInputVal2] = useState(95);
             const [loading, setLoading] = useState(false);
             const [result, setResult] = useState(null);
             const [isProUser, setIsProUser] = useState(false);
@@ -65,7 +64,6 @@
             const [copied, setCopied] = useState(false);
             const [sellerMsgCopied, setSellerMsgCopied] = useState(false);
 
-            // 使用 useMemo 惰性创建 Showdown 转换器
             const converter = useMemo(() => {
                 if (window.showdown) {
                     return new window.showdown.Converter({
@@ -113,7 +111,6 @@
                 const token = localStorage.getItem('chinafit_pro_token') || '';
 
                 try {
-                    // 正确区分品类，Pants 使用 waist 而不是 weight
                     let payload;
                     if (activeTab === 'shoes') {
                         payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
@@ -147,76 +144,92 @@
                 }
             };
 
-            // 复制完整报告（Markdown原文）
             const copyReport = () => {
                 if (result && result.proAnalysis) {
                     navigator.clipboard.writeText(result.proAnalysis).then(() => {
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
-                    }).catch(err => {
-                        console.error('Copy failed:', err);
-                    });
+                    }).catch(err => console.error('Copy failed:', err));
                 }
             };
 
-            // 提取客服模板（中文部分）
+            // 提取客服模板：兼容带/不带下划线的标记，提取纯中文消息
             const extractSellerMessage = (markdown) => {
                 if (!markdown) return null;
-                const startMarker = '---SELLER_MESSAGE_START---';
-                const endMarker = '---SELLER_MESSAGE_END---';
-                const startIdx = markdown.indexOf(startMarker);
-                const endIdx = markdown.indexOf(endMarker);
+                const startMarkers = ['---SELLER_MESSAGE_START---', '---SELLERMESSAGESTART---'];
+                const endMarkers = ['---SELLER_MESSAGE_END---', '---SELLERMESSAGEEND---'];
+                let startIdx = -1, endIdx = -1, startMarkerLen = 0;
+
+                for (let i = 0; i < startMarkers.length; i++) {
+                    const idx = markdown.indexOf(startMarkers[i]);
+                    if (idx !== -1) {
+                        startIdx = idx;
+                        startMarkerLen = startMarkers[i].length;
+                        for (let j = 0; j < endMarkers.length; j++) {
+                            const endIdxTmp = markdown.indexOf(endMarkers[j], startIdx + startMarkerLen);
+                            if (endIdxTmp !== -1) {
+                                endIdx = endIdxTmp;
+                                break;
+                            }
+                        }
+                        if (endIdx !== -1) break;
+                    }
+                }
+
                 if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
-                const section = markdown.slice(startIdx + startMarker.length, endIdx).trim();
-                return section;
+                const section = markdown.slice(startIdx + startMarkerLen, endIdx).trim();
+                const lines = section.split('\n');
+                const chineseLines = lines.filter(line => /[\u4e00-\u9fa5]/.test(line));
+                const chineseMsg = chineseLines.join(' ').replace(/[*_`>#]/g, '').replace(/\s+/g, ' ').trim();
+                return chineseMsg;
             };
 
             const sellerMsgSection = result?.proAnalysis ? extractSellerMessage(result.proAnalysis) : null;
 
-            // 复制客服中文模板
             const copySellerMsg = () => {
                 if (sellerMsgSection) {
-                    // 提取纯中文句子（去掉英文翻译和Markdown符号）
-                    const lines = sellerMsgSection.split('\n');
-                    const chineseLines = lines.filter(line => /[\u4e00-\u9fa5]/.test(line));
-                    const chineseMsg = chineseLines.join(' ').replace(/[*_`>#]/g, '').trim();
-                    if (chineseMsg) {
-                        navigator.clipboard.writeText(chineseMsg).then(() => {
-                            setSellerMsgCopied(true);
-                            setTimeout(() => setSellerMsgCopied(false), 2000);
-                        }).catch(err => console.error('Copy failed:', err));
-                    }
+                    navigator.clipboard.writeText(sellerMsgSection).then(() => {
+                        setSellerMsgCopied(true);
+                        setTimeout(() => setSellerMsgCopied(false), 2000);
+                    }).catch(err => console.error('Copy failed:', err));
                 }
             };
 
-            // 将 Markdown 转换为 HTML
+            // 渲染正文 Markdown：使用 split 彻底移除 SELLER_MESSAGE 块
             const getHtmlContent = (markdownText) => {
                 if (!markdownText) return '<p class="text-slate-400">No analysis available.</p>';
-                if (converter) {
-                    return converter.makeHtml(markdownText);
+                
+                let cleanMarkdown = markdownText;
+                const startMarkers = ['---SELLER_MESSAGE_START---', '---SELLERMESSAGESTART---'];
+                const endMarkers = ['---SELLER_MESSAGE_END---', '---SELLERMESSAGEEND---'];
+                
+                // 循环移除所有可能的标记块
+                for (let i = 0; i < startMarkers.length; i++) {
+                    for (let j = 0; j < endMarkers.length; j++) {
+                        const parts = cleanMarkdown.split(startMarkers[i]);
+                        if (parts.length > 1) {
+                            // 从第一个标记之后开始，找到对应的结束标记
+                            for (let k = 1; k < parts.length; k++) {
+                                const endIdx = parts[k].indexOf(endMarkers[j]);
+                                if (endIdx !== -1) {
+                                    parts[k] = parts[k].slice(endIdx + endMarkers[j].length);
+                                } else {
+                                    // 如果没有找到结束标记，则删除该部分之后的所有内容
+                                    parts[k] = '';
+                                }
+                            }
+                            cleanMarkdown = parts.join('');
+                        }
+                    }
                 }
-                const escaped = markdownText
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
+
+                if (converter) return converter.makeHtml(cleanMarkdown);
+                const escaped = cleanMarkdown.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return `<pre class="text-slate-400 whitespace-pre-wrap">${escaped}</pre>`;
             };
 
-            // 生成快速参考文本，根据品类和输入值动态返回
             const getQuickReference = () => {
-                if (activeTab === 'shoes') {
-                    return 'Compare seller\'s reply with your report: Insole length 26.0–26.5 cm (snug) or 26.5–27.0 cm (comfortable); Insole width 9.5–10.0 cm. If insole <26.0 cm, size up.';
-                } else if (activeTab === 'tops') {
-                    return 'Compare seller\'s reply with your report: Chest 104–112 cm (regular) / 112–120 cm (oversized); Shoulder 44–46 cm (regular) / 47–50 cm (oversized); Sleeve 62–66 cm; Length 68–74 cm. Cotton may shrink 3-5% — consider sizing up.';
-                } else if (activeTab === 'pants') {
-                    const waistNum = parseFloat(inputVal2) || 75;
-                    const heightNum = parseFloat(inputVal1) || 175;
-                    const waistTargetMin = (waistNum + 2).toFixed(1);
-                    const waistTargetMax = (waistNum + 4).toFixed(1);
-                    const inseamTarget = heightNum >= 180 ? '80-85 cm' : heightNum >= 170 ? '75-80 cm' : '70-75 cm';
-                    return `Compare seller's reply with your report: Waist (half circumference) should be ${waistTargetMin}–${waistTargetMax} cm (your waist ${waistNum} cm + 2-4 cm comfort). Inseam length recommended ${inseamTarget} for your height. Check hip width if provided (typically 96-102 cm for standard fit).`;
-                }
-                return '';
+                return 'Compare the seller\'s reply with the measurement targets in your report above (Section 3). If measurements match your target range, proceed with confidence.';
             };
 
             return (
@@ -233,10 +246,7 @@
                                     Lifetime Pro Active
                                 </span>
                             ) : (
-                                <a
-                                    href={CREEM_PAYMENT_URL}
-                                    className="px-4 py-2 rounded-full bg-china-red text-white text-xs sm:text-sm font-semibold hover:bg-red-700 transition-all shadow-lg shadow-red-600/30 active:scale-95"
-                                >
+                                <a href={CREEM_PAYMENT_URL} className="px-4 py-2 rounded-full bg-china-red text-white text-xs sm:text-sm font-semibold hover:bg-red-700 transition-all shadow-lg shadow-red-600/30 active:scale-95">
                                     Get Pro Pass ($4.99)
                                 </a>
                             )}
@@ -252,24 +262,9 @@
 
                             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
                                 <div className="flex rounded-xl bg-slate-950 p-1 mb-8 border border-slate-800">
-                                    <button
-                                        onClick={() => handleTabChange('shoes', 260, 95)}
-                                        className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'shoes' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                        👟 Shoes
-                                    </button>
-                                    <button
-                                        onClick={() => handleTabChange('tops', 175, 70)}
-                                        className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'tops' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                        👕 Tops
-                                    </button>
-                                    <button
-                                        onClick={() => handleTabChange('pants', 175, 75)}
-                                        className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'pants' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                        👖 Pants
-                                    </button>
+                                    <button onClick={() => handleTabChange('shoes', 260, 95)} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'shoes' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>👟 Shoes</button>
+                                    <button onClick={() => handleTabChange('tops', 175, 70)} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'tops' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>👕 Tops</button>
+                                    <button onClick={() => handleTabChange('pants', 175, 75)} className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${activeTab === 'pants' ? 'bg-china-red text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>👖 Pants</button>
                                 </div>
 
                                 <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -277,36 +272,16 @@
                                         <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                                             {activeTab === 'shoes' ? 'Foot Length (mm)' : 'Height (cm)'}
                                         </label>
-                                        <input
-                                            type="number"
-                                            value={inputVal1}
-                                            onChange={(e) => setInputVal1(e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
-                                            placeholder={activeTab === 'shoes' ? 'e.g. 260' : 'e.g. 175'}
-                                            required
-                                            min="1"
-                                        />
+                                        <input type="number" value={inputVal1} onChange={(e) => setInputVal1(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors" placeholder={activeTab === 'shoes' ? 'e.g. 260' : 'e.g. 175'} required min="1" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                                             {activeTab === 'shoes' ? 'Foot Width (mm)' : activeTab === 'tops' ? 'Weight (kg)' : 'Waist (cm)'}
                                         </label>
-                                        <input
-                                            type="number"
-                                            value={inputVal2}
-                                            onChange={(e) => setInputVal2(e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
-                                            placeholder={activeTab === 'shoes' ? 'e.g. 95' : activeTab === 'tops' ? 'e.g. 70' : 'e.g. 75'}
-                                            required
-                                            min="1"
-                                        />
+                                        <input type="number" value={inputVal2} onChange={(e) => setInputVal2(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors" placeholder={activeTab === 'shoes' ? 'e.g. 95' : activeTab === 'tops' ? 'e.g. 70' : 'e.g. 75'} required min="1" />
                                     </div>
                                     <div className="sm:col-span-2 mt-2">
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="w-full py-3.5 rounded-xl bg-china-red text-white font-bold hover:bg-red-700 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
-                                        >
+                                        <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-china-red text-white font-bold hover:bg-red-700 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]">
                                             {loading ? (
                                                 <>
                                                     <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -323,9 +298,7 @@
                                 </form>
 
                                 {errorMsg && (
-                                    <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                                        ⚠️ {errorMsg}
-                                    </div>
+                                    <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">⚠️ {errorMsg}</div>
                                 )}
 
                                 {result && !loading && (
@@ -346,39 +319,27 @@
                                                         <div className="flex items-center space-x-2">
                                                             <span>✨ DeepSeek AI Expert Deep Breakdown</span>
                                                         </div>
-                                                        <button
-                                                            onClick={copyReport}
-                                                            className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
-                                                        >
+                                                        <button onClick={copyReport} className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
                                                             {copied ? '✓ Copied' : '📋 Copy Full Report'}
                                                         </button>
                                                     </div>
-                                                    <div
-                                                        className="markdown-content"
-                                                        dangerouslySetInnerHTML={{ __html: getHtmlContent(result.proAnalysis) }}
-                                                    />
+                                                    <div className="markdown-content" dangerouslySetInnerHTML={{ __html: getHtmlContent(result.proAnalysis) }} />
                                                 </div>
 
-                                                {/* 客服模板卡片 */}
                                                 {sellerMsgSection && (
                                                     <div className="bg-slate-900 p-5 rounded-xl border border-emerald-500/30 shadow-lg">
                                                         <div className="flex items-center justify-between mb-3">
                                                             <h3 className="text-sm font-bold text-emerald-400">💬 Seller Message Template (Copy-Paste to Taobao/1688)</h3>
-                                                            <button
-                                                                onClick={copySellerMsg}
-                                                                className="px-3 py-1 text-xs font-semibold rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 transition"
-                                                            >
+                                                            <button onClick={copySellerMsg} className="px-3 py-1 text-xs font-semibold rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 transition">
                                                                 {sellerMsgCopied ? '✓ Copied' : '📋 Copy Chinese'}
                                                             </button>
                                                         </div>
-                                                        <div className="text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap">
+                                                        <div className="text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap leading-relaxed">
                                                             {sellerMsgSection}
                                                         </div>
-                                                        {getQuickReference() && (
-                                                            <p className="text-xs text-slate-500 mt-2">
-                                                                <span className="font-semibold text-slate-400">📏 Quick Reference:</span> {getQuickReference()}
-                                                            </p>
-                                                        )}
+                                                        <p className="text-xs text-slate-500 mt-2">
+                                                            <span className="font-semibold text-slate-400">📏 Quick Reference:</span> {getQuickReference()}
+                                                        </p>
                                                     </div>
                                                 )}
                                             </>
@@ -389,10 +350,7 @@
                                                 <p className="text-xs text-slate-400 mb-4 max-w-sm mx-auto">
                                                     Get brand comparisons (Taobao vs Dewu/Nike), insole tolerance charts & shrinkage warnings.
                                                 </p>
-                                                <a
-                                                    href={CREEM_PAYMENT_URL}
-                                                    className="inline-block px-6 py-2.5 rounded-lg bg-china-red hover:bg-red-700 font-semibold text-xs sm:text-sm text-white shadow-lg shadow-red-600/30 transition active:scale-95"
-                                                >
+                                                <a href={CREEM_PAYMENT_URL} className="inline-block px-6 py-2.5 rounded-lg bg-china-red hover:bg-red-700 font-semibold text-xs sm:text-sm text-white shadow-lg shadow-red-600/30 transition active:scale-95">
                                                     Unlock Lifetime Pass for $4.99
                                                 </a>
                                             </div>
