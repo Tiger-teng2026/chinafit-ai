@@ -1,121 +1,160 @@
 // ChinaFit AI 核心计算引擎 (Node.js 后端 - Vercel Serverless Function)
-// 使用 CommonJS 导出，确保与 Vercel 默认环境兼容
-// 接入 DeepSeek AI 进行智能尺码推理
+// 使用 CommonJS 导出，兼容 Vercel 默认环境
+// 免费用户走基础规则引擎，付费用户调用 DeepSeek 深度分析
 
 module.exports = async function handler(req, res) {
-    // 设置 CORS 头（便于本地调试）
+    // 设置 CORS 头
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-premium-token');
+  
     // 处理预检请求
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+      return res.status(200).end();
     }
-
-    // 只接受 POST 请求
+  
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed. Please use POST.' });
+      return res.status(405).json({ error: 'Method Not Allowed' });
     }
-
-    // 获取前端发送的参数（保持原有结构）
-    const { category, val1, val2 } = req.body || {};
-    const numericVal1 = Number(val1);
-    const numericVal2 = Number(val2);
-
-    // 基础参数校验
-    if (!category || !['shoes', 'tops', 'pants'].includes(category)) {
-        return res.status(400).json({ error: 'Invalid category. Must be shoes, tops, or pants.' });
-    }
-    if (isNaN(numericVal1) || isNaN(numericVal2) || numericVal1 <= 0 || numericVal2 <= 0) {
-        return res.status(400).json({ error: 'Body measurements must be positive numbers.' });
-    }
-
-    // 检查 DeepSeek API Key 是否存在
-    const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) {
-        console.error('DEEPSEEK_API_KEY is not set in Vercel environment variables.');
-        return res.status(500).json({ error: 'DeepSeek API key is not configured on the server.' });
-    }
-
-    // 根据 category 构建给 DeepSeek 的提示词
-    let promptContext = '';
-    if (category === 'shoes') {
-        promptContext = `The user is shopping for shoes on a Chinese platform. 
-        - Foot length: ${numericVal1} mm
-        - Foot width: ${numericVal2} mm
-        Please recommend the appropriate Chinese shoe size, including EUR and US equivalents.`;
-    } else if (category === 'tops') {
-        promptContext = `The user is shopping for tops/outerwear on a Chinese platform.
-        - Height: ${numericVal1} cm
-        - Weight: ${numericVal2} kg
-        Please recommend the appropriate Chinese clothing size (e.g., S, M, L, XL) and note that Chinese sizes tend to run small.`;
-    } else if (category === 'pants') {
-        promptContext = `The user is shopping for pants on a Chinese platform.
-        - Height: ${numericVal1} cm
-        - Waist circumference: ${numericVal2} cm
-        Please recommend the appropriate Chinese pants size, including US waist size and fit type.`;
-    }
-
-    const prompt = `You are an expert AI fashion and sizing consultant for international shoppers buying from Chinese platforms (e.g., Taobao, JD, Poizon/Dewu).
-
-    ${promptContext}
-
-    Important: Respond entirely in English. Provide a clear JSON object with the following keys:
-    - "recommendedSize": string (e.g., "42 EUR / 8.5 US" or "L (CN 180/96A)")
-    - "confidence": string (e.g., "95%")
-    - "fitAdvice": string (e.g., "Standard fit, buy regular size")
-    - "insights": string (detailed explanation referencing the user's measurements and Chinese sizing characteristics)
-
-    Ensure the JSON is valid and contains no additional text outside the JSON.`;
-
+  
     try {
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: 'deepseek-chat',
-                messages: [
-                    { role: 'system', content: 'You are a helpful sizing assistant. Always output valid JSON.' },
-                    { role: 'user', content: prompt }
-                ],
-                response_format: { type: 'json_object' },
-                temperature: 0.3,
-                max_tokens: 500
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error('DeepSeek API error:', data);
-            throw new Error(data.error?.message || 'Failed to call DeepSeek API');
-        }
-
-        // 解析 DeepSeek 返回的内容
-        const aiContent = data.choices[0].message.content;
-        let aiResult;
-        try {
-            aiResult = JSON.parse(aiContent);
-        } catch (parseError) {
-            console.error('Failed to parse DeepSeek JSON response:', aiContent);
-            throw new Error('Invalid response format from AI engine.');
-        }
-
-        // 返回标准格式给前端
+      const { category, footLength, footWidth, height, weight, waist, gender = 'Unisex' } = req.body;
+      const clientToken = req.headers['x-premium-token'] || '';
+      const validToken = process.env.PRO_PASS_KEY || 'pro_pass_2026';
+      const isPro = clientToken === validToken;
+  
+      // ---------- 1. 基础规则引擎（免费用户可见） ----------
+      let baseResult = {};
+  
+      if (category === 'shoes') {
+        const fl = parseFloat(footLength) || 260;
+        let euSize;
+        if (fl <= 245) euSize = 39;
+        else if (fl <= 250) euSize = 40;
+        else if (fl <= 255) euSize = 41;
+        else if (fl <= 260) euSize = 42;
+        else if (fl <= 265) euSize = 43;
+        else if (fl <= 275) euSize = 44;
+        else euSize = 45;
+  
+        const usSize = (euSize - 33).toFixed(1);
+        baseResult = {
+          recommendedSize: `EU ${euSize} / US ${usSize}`,
+          confidence: '88%',
+          quickTip: 'Standard fit. Asian lasts may run slightly narrower than Western brands.'
+        };
+      } else if (category === 'tops') {
+        const h = parseFloat(height) || 175;
+        const w = parseFloat(weight) || 70;
+        let size;
+        if (h < 165 || w < 55) size = 'S';
+        else if (h < 172 || w < 65) size = 'M';
+        else if (h < 180 || w < 78) size = 'L';
+        else if (h < 188 || w < 88) size = 'XL';
+        else size = '2XL+';
+  
+        baseResult = {
+          recommendedSize: `CN / Asian Size: ${size}`,
+          confidence: '85%',
+          quickTip: 'Asian garment sizes run 1 to 2 sizes smaller than US/EU standards.'
+        };
+      } else if (category === 'pants') {
+        const h = parseFloat(height) || 175;
+        const w = parseFloat(waist) || 75;
+        let size;
+        if (w >= 90) size = '34 (US) / 88cm';
+        else if (w >= 80) size = '32 (US) / 82cm';
+        else if (w >= 72) size = '31 (US) / 78cm';
+        else size = '30 (US) / 76cm';
+  
+        baseResult = {
+          recommendedSize: `Waist ${size}`,
+          confidence: '90%',
+          quickTip: `Waist ${w}cm, height ${h}cm. Standard length recommended.`
+        };
+      } else {
+        return res.status(400).json({ error: 'Invalid category. Must be shoes, tops, or pants.' });
+      }
+  
+      // 非 Pro 用户，只返回基础结果
+      if (!isPro) {
         return res.status(200).json({
-            success: true,
-            size: aiResult.recommendedSize,
-            fit: aiResult.fitAdvice,
-            confidence: aiResult.confidence,
-            extra: aiResult.insights
+          isPro: false,
+          baseResult,
+          proAnalysis: null,
+          message: 'Base calculation complete. Upgrade to Pro for deep AI breakdown.'
         });
-
+      }
+  
+      // ---------- 2. Pro 用户：调用 DeepSeek 深度分析 ----------
+      const apiKey = process.env.DEEPSEEK_API_KEY;
+      if (!apiKey) {
+        return res.status(200).json({
+          isPro: true,
+          baseResult,
+          proAnalysis: 'AI Engine configured, but DEEPSEEK_API_KEY is missing in Vercel.',
+        });
+      }
+  
+      // 根据品类构建针对性的提示词
+      let promptContext = '';
+      if (category === 'shoes') {
+        promptContext = `The user is shopping for shoes on Chinese platforms.
+  - Foot Length: ${footLength || 'N/A'} mm
+  - Foot Width: ${footWidth || 'N/A'} mm`;
+      } else if (category === 'tops') {
+        promptContext = `The user is shopping for tops/outerwear on Chinese platforms.
+  - Height: ${height || 'N/A'} cm
+  - Weight: ${weight || 'N/A'} kg`;
+      } else if (category === 'pants') {
+        promptContext = `The user is shopping for pants on Chinese platforms.
+  - Height: ${height || 'N/A'} cm
+  - Waist: ${waist || 'N/A'} cm`;
+      }
+  
+      const prompt = `You are a professional cross-border fashion sizing expert specializing in Chinese e-commerce platforms (Taobao, JD.com, Poizon/Dewu, 1688, Weidian) for international buyers.
+  ${promptContext}
+  - Target Gender: ${gender}
+  
+  Please provide an in-depth, structured sizing breakdown in clear English markdown:
+  1. **Precise Size Conversion** (CN / EU / US / UK).
+  2. **Platform Specific Fit Warnings** (Taobao/1688 sizing vs Poizon streetwear sizing).
+  3. **Key Measurements to Check** (e.g. Chest/Shoulder/Insole in cm).
+  4. **Tailored Advice** (Shrinkage risk, loose vs slim cut recommendation).
+  Keep it professional, encouraging, and actionable.`;
+  
+      const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: 'You are ChinaFit AI sizing expert.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.6,
+          max_tokens: 800
+        })
+      });
+  
+      const aiData = await deepseekResponse.json();
+      if (!deepseekResponse.ok) {
+        console.error('DeepSeek API error:', aiData);
+        throw new Error(aiData.error?.message || 'Failed to call DeepSeek API');
+      }
+  
+      const proAnalysis = aiData.choices?.[0]?.message?.content || 'AI analysis completed.';
+  
+      return res.status(200).json({
+        isPro: true,
+        baseResult,
+        proAnalysis
+      });
     } catch (error) {
-        console.error('AI Calculation Error:', error);
-        return res.status(500).json({ error: error.message || 'Internal Server Error' });
+      console.error('Calculation error:', error);
+      return res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
-};
+  };
