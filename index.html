@@ -8,8 +8,8 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 引入稳定版 marked 渲染器 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <!-- 引入稳定的 Markdown 解析器 Showdown -->
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -21,28 +21,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 专门针对 Markdown 报告的排版样式 */
-        .markdown-body { color: #cbd5e1; font-size: 0.875rem; line-height: 1.6; }
-        .markdown-body h1 { font-size: 1.2rem; font-weight: 700; color: #ffffff; margin-top: 1rem; margin-bottom: 0.5rem; }
-        .markdown-body h2 { font-size: 1.05rem; font-weight: 700; color: #f87171; margin-top: 1.25rem; margin-bottom: 0.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.35rem; }
-        .markdown-body h3 { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-top: 1rem; margin-bottom: 0.35rem; }
-        .markdown-body p { margin-bottom: 0.75rem; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-body li { margin-bottom: 0.35rem; }
-        .markdown-body strong { color: #ffffff; font-weight: 600; }
-        .markdown-body blockquote { border-left: 3px solid #ef4444; padding-left: 0.75rem; color: #94a3b8; margin: 0.75rem 0; background: rgba(239, 68, 68, 0.05); padding-top: 0.25rem; padding-bottom: 0.25rem; border-radius: 0 0.375rem 0.375rem 0; }
-        .markdown-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.825rem; }
-        .markdown-body th, .markdown-body td { border: 1px solid #334155; padding: 0.5rem 0.75rem; text-align: left; }
-        .markdown-body th { background-color: #0f172a; color: #f87171; font-weight: 600; }
-        .markdown-body tr:nth-child(even) { background-color: rgba(15, 23, 42, 0.5); }
-        .markdown-body hr { border: 0; border-top: 1px solid #334155; margin: 1.25rem 0; }
+        /* 深度分析报告排版样式 */
+        .markdown-content h1 { font-size: 1.3rem !important; font-weight: 800 !important; color: #ffffff !important; margin: 1.2rem 0 0.6rem 0 !important; }
+        .markdown-content h2 { font-size: 1.15rem !important; font-weight: 700 !important; color: #f87171 !important; margin: 1.4rem 0 0.6rem 0 !important; border-bottom: 1px solid #334155 !important; padding-bottom: 0.4rem !important; }
+        .markdown-content h3 { font-size: 1rem !important; font-weight: 600 !important; color: #e2e8f0 !important; margin: 1.1rem 0 0.4rem 0 !important; }
+        .markdown-content p { color: #cbd5e1 !important; font-size: 0.875rem !important; line-height: 1.65 !important; margin-bottom: 0.75rem !important; }
+        .markdown-content strong { color: #ffffff !important; font-weight: 700 !important; }
+        .markdown-content ul { list-style-type: disc !important; padding-left: 1.25rem !important; margin: 0.5rem 0 0.8rem 0 !important; color: #cbd5e1 !important; font-size: 0.875rem !important; }
+        .markdown-content li { margin-bottom: 0.35rem !important; }
+        .markdown-content blockquote { border-left: 4px solid #ef4444 !important; background: rgba(239, 68, 68, 0.08) !important; padding: 0.6rem 0.85rem !important; margin: 0.8rem 0 !important; border-radius: 0 0.5rem 0.5rem 0 !important; color: #fca5a5 !important; font-size: 0.85rem !important; }
+        .markdown-content table { width: 100% !important; border-collapse: collapse !important; margin: 1rem 0 !important; font-size: 0.825rem !important; background: rgba(15, 23, 42, 0.7) !important; border-radius: 8px !important; overflow: hidden !important; border: 1px solid #334155 !important; }
+        .markdown-content th { background-color: #1e293b !important; color: #f87171 !important; font-weight: 700 !important; text-align: left !important; padding: 0.6rem 0.75rem !important; border: 1px solid #334155 !important; }
+        .markdown-content td { padding: 0.55rem 0.75rem !important; border: 1px solid #334155 !important; color: #cbd5e1 !important; }
+        .markdown-content tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.4) !important; }
+        .markdown-content hr { border: 0 !important; border-top: 1px solid #334155 !important; margin: 1.5rem 0 !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-red-600 selection:text-white">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         const CREEM_PAYMENT_URL = 'https://www.creem.io/payment/prod_3QstQYL7PxXPdFQJ9GWMlA';
 
@@ -55,7 +54,21 @@
             const [isProUser, setIsProUser] = useState(false);
             const [errorMsg, setErrorMsg] = useState('');
 
-            // 检查 Pro 激活状态（支持 URL 参数和 localStorage）
+            // 使用 useMemo 惰性创建 Showdown 转换器，避免 window.showdown 未定义时报错
+            const converter = useMemo(() => {
+                if (window.showdown) {
+                    return new window.showdown.Converter({
+                        tables: true,
+                        simplifiedAutoLink: true,
+                        strikethrough: true,
+                        tasklists: true,
+                        ghCodeBlocks: true
+                    });
+                }
+                return null;
+            }, []);
+
+            // 检查 Pro 激活状态
             useEffect(() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const paidToken = urlParams.get('paid');
@@ -86,7 +99,7 @@
                 const token = localStorage.getItem('chinafit_pro_token') || '';
 
                 try {
-                    // 正确区分品类，pants 发送 waist 而不是 weight
+                    // 修复：根据品类正确构建 payload，Pants 使用 waist 而不是 weight
                     let payload;
                     if (activeTab === 'shoes') {
                         payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
@@ -120,17 +133,18 @@
                 }
             };
 
-            // 使用 marked 解析 Markdown，若未加载则原样显示
-            const formatMarkdown = (content) => {
-                if (!content) return { __html: '' };
-                try {
-                    if (window.marked && typeof window.marked.parse === 'function') {
-                        return { __html: window.marked.parse(content) };
-                    }
-                } catch (e) {
-                    console.error('Marked parse error:', e);
+            // 将 Markdown 转换为 HTML，若转换器不可用则返回纯文本
+            const getHtmlContent = (markdownText) => {
+                if (!markdownText) return '<p class="text-slate-400">No analysis available.</p>';
+                if (converter) {
+                    return converter.makeHtml(markdownText);
                 }
-                return { __html: content };
+                // 简单转义，防止 XSS（虽然内容来自可信后端，但安全第一）
+                const escaped = markdownText
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                return `<pre class="text-slate-400 whitespace-pre-wrap">${escaped}</pre>`;
             };
 
             return (
@@ -259,8 +273,8 @@
                                                     <span>✨ DeepSeek AI Expert Deep Breakdown</span>
                                                 </div>
                                                 <div
-                                                    className="markdown-body"
-                                                    dangerouslySetInnerHTML={formatMarkdown(result.proAnalysis)}
+                                                    className="markdown-content"
+                                                    dangerouslySetInnerHTML={{ __html: getHtmlContent(result.proAnalysis) }}
                                                 />
                                             </div>
                                         ) : (
