@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChinaFit AI - Smart Size & Fit Recommendation System (MVP)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Mermaid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .china-red { color: #E60012; }
+        .bg-china-red { background-color: #E60012; }
+        .border-china-red { border-color: #E60012; }
+        /* 动画 */
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-red-600 selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, memo } = React;
+
+        // 初始化 Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+        // 架构图子组件：使用 memo 避免父组件重新渲染时干扰 Mermaid 生成的 SVG
+        const ArchitectureDiagram = memo(() => {
+            useEffect(() => {
+                mermaid.run({ querySelector: '.mermaid' });
+            }, []);
+            return (
+                <div className="mermaid">
+                    {`graph TD
+                        A[Frontend React + Tailwind MVP] -->|HTTP/REST JSON| B(Backend Go / Gin API Gateway)
+                        B --> C{User Data Validation}
+                        C -->|Cache Hit| D[(Redis Size Cache)]
+                        C -->|Cache Miss| E[(MySQL Database)]
+                        E --> F[AI Size Recommendation Engine]
+                        F -->|Return Fit Analysis| B
+                        B -->|Response Data| A`}
+                </div>
+            );
+        });
+
+        function App() {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const [activeTab, setActiveTab] = useState('shoes');
+            
+            // 尺码计算器状态
+            const [inputVal1, setInputVal1] = useState(260); // 身高/脚长
+            const [inputVal2, setInputVal2] = useState(95);  // 体重/胸围
+            const [result, setResult] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            // FAQ 状态
+            const [openFaq, setOpenFaq] = useState(null);
+
+            // 模拟计算逻辑
+            const handleCalculate = (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setTimeout(() => {
+                    if (activeTab === 'shoes') {
+                        setResult({ 
+                            size: '42.5 (EUR) / 9 (US)', 
+                            fit: 'Standard to Relaxed', 
+                            confidence: '98%',
+                            extra: 'Width: Medium (D)'
+                        });
+                    } else if (activeTab === 'tops') {
+                        setResult({ 
+                            size: 'L (US) / 50 (EU) / 180/100A (CN)', 
+                            fit: 'Slim Fit', 
+                            confidence: '96%',
+                            extra: 'Shoulder: 46cm | Chest: 104cm'
+                        });
+                    } else {
+                        setResult({ 
+                            size: '32 (US) / 82cm Waist', 
+                            fit: 'Straight Comfort', 
+                            confidence: '95%',
+                            extra: 'Inseam: 78cm | Hip: 98cm'
+                        });
+                    }
+                    setLoading(false);
+                }, 600);
+            };
+
+            // 切换 Tab 时清空结果并重置输入
+            const handleTabChange = (tab, val1, val2) => {
+                setActiveTab(tab);
+                setInputVal1(val1);
+                setInputVal2(val2);
+                setResult(null);
+            };
+
+            // 创建 Lucide 图标
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [result, activeTab, mobileMenuOpen, openFaq]);
+
+            return (
+                <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+                    
+                    {/* 1. 响应式头部 */}
+                    <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-lg bg-china-red flex items-center justify-center font-bold text-white tracking-tighter shadow-lg shadow-red-600/30">
+                                    AI
+                                </div>
+                                <span className="text-xl font-bold tracking-tight text-white">
+                                    ChinaFit <span className="china-red">AI</span>
+                                </span>
+                            </div>
+
+                            <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                                <a href="#hero" className="hover:text-white transition-colors">Home</a>
+                                <a href="#calculator" className="hover:text-white transition-colors">Size Calculator</a>
+                                <a href="#architecture" className="hover:text-white transition-colors">Architecture</a>
+                                <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+                            </nav>
+
+                            <div className="hidden md:flex items-center space-x-4">
+                                <button className="text-sm font-medium text-slate-300 hover:text-white">Log in</button>
+                                <button className="px-4 py-2 rounded-full bg-china-red text-white text-sm font-medium hover:bg-red-700 transition-all shadow-lg shadow-red-600/20">
+                                    Get Started Free
+                                </button>
+                            </div>
+
+                            <div className="md:hidden flex items-center">
+                                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-300 hover:text-white">
+                                    <i data-lucide={mobileMenuOpen ? "x" : "menu"} className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 移动端菜单 */}
+                        {mobileMenuOpen && (
+                            <div className="md:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-4 space-y-3">
+                                <a href="#hero" className="block text-slate-300 hover:text-white py-1">Home</a>
+                                <a href="#calculator" className="block text-slate-300 hover:text-white py-1">Size Calculator</a>
+                                <a href="#architecture" className="block text-slate-300 hover:text-white py-1">Architecture</a>
+                                <a href="#faq" className="block text-slate-300 hover:text-white py-1">FAQ</a>
+                                <div className="pt-2 border-t border-slate-800 flex flex-col space-y-2">
+                                    <button className="w-full py-2 rounded-lg bg-slate-800 text-white text-sm font-medium">Log in</button>
+                                    <button className="w-full py-2 rounded-lg bg-china-red text-white text-sm font-medium">Get Started Free</button>
+                                </div>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* 2. Hero 宣传区 */}
+                    <section id="hero" className="relative overflow-hidden py-20 lg:py-32">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(230,0,18,0.08),transparent_50%)]"></div>
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300 mb-6">
+                                <span className="flex h-2 w-2 rounded-full bg-china-red animate-pulse"></span>
+                                <span>LLM-Powered Fit Engine for Asian Body Types v1.0 MVP</span>
+                            </div>
+                            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+                                Perfect Fit, Powered by AI & <span className="china-red">Asian Body Data</span>
+                            </h1>
+                            <p className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto">
+                                Say goodbye to size guesswork and returns. Our AI precisely matches shoes & apparel to your unique measurements.
+                            </p>
+                            <div className="mt-10 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                <a href="#calculator" className="w-full sm:w-auto px-8 py-4 rounded-full bg-china-red text-white font-medium hover:bg-red-700 transition-all shadow-xl shadow-red-600/30 flex items-center justify-center space-x-2">
+                                    <span>Calculate My Size</span>
+                                    <i data-lucide="arrow-right" className="w-4 h-4"></i>
+                                </a>
+                                <a href="#architecture" className="w-full sm:w-auto px-8 py-4 rounded-full bg-slate-900 border border-slate-800 text-slate-300 font-medium hover:bg-slate-800 transition-all flex items-center justify-center space-x-2">
+                                    <span>View Architecture</span>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 3. 互动式尺码换算器 */}
+                    <section id="calculator" className="py-16 bg-slate-900/50 border-y border-slate-800/60">
+                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center mb-12">
+                                <h2 className="text-3xl font-bold text-white">Smart Size Calculator</h2>
+                                <p className="text-slate-400 mt-2">Select a category and enter your measurements – AI will instantly recommend the right size.</p>
+                            </div>
+
+                            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+                                {/* 品类切换 Tabs */}
+                                <div className="flex rounded-xl bg-slate-950 p-1.5 mb-8 border border-slate-800">
+                                    <button 
+                                        onClick={() => handleTabChange('shoes', 260, 95)}
+                                        className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all flex items-center justify-center space-x-2 ${activeTab === 'shoes' ? 'bg-china-red text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
+                                        <i data-lucide="footprints" className="w-4 h-4"></i>
+                                        <span>Shoes</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleTabChange('tops', 175, 70)}
+                                        className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all flex items-center justify-center space-x-2 ${activeTab === 'tops' ? 'bg-china-red text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
+                                        <i data-lucide="shirt" className="w-4 h-4"></i>
+                                        <span>Tops / Outerwear</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleTabChange('pants', 175, 75)}
+                                        className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all flex items-center justify-center space-x-2 ${activeTab === 'pants' ? 'bg-china-red text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
+                                        <i data-lucide="component" className="w-4 h-4"></i>
+                                        <span>Pants</span>
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="input1" className="block text-sm font-medium text-slate-300 mb-2">
+                                            {activeTab === 'shoes' ? 'Foot Length (mm)' : 'Height (cm)'}
+                                        </label>
+                                        <input 
+                                            id="input1"
+                                            type="number" 
+                                            value={inputVal1} 
+                                            onChange={(e) => setInputVal1(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
+                                            required 
+                                            placeholder={activeTab === 'shoes' ? 'e.g. 260' : 'e.g. 175'}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="input2" className="block text-sm font-medium text-slate-300 mb-2">
+                                            {activeTab === 'shoes' ? 'Foot Width Est. (mm)' : activeTab === 'tops' ? 'Weight (kg)' : 'Waist (cm)'}
+                                        </label>
+                                        <input 
+                                            id="input2"
+                                            type="number" 
+                                            value={inputVal2} 
+                                            onChange={(e) => setInputVal2(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
+                                            required 
+                                            placeholder={activeTab === 'shoes' ? 'e.g. 95' : activeTab === 'tops' ? 'e.g. 70' : 'e.g. 75'}
+                                        />
+                                    </div>
+
+                                    <div className="sm:col-span-2 mt-2">
+                                        <button 
+                                            type="submit" 
+                                            disabled={loading}
+                                            className="w-full py-4 rounded-xl bg-china-red text-white font-semibold hover:bg-red-700 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-red-600/20 disabled:opacity-60 disabled:cursor-not-allowed">
+                                            {loading ? (
+                                                <span className="flex items-center space-x-2">
+                                                    <i data-lucide="loader-2" className="w-5 h-5 animate-spin"></i>
+                                                    <span>AI is calculating...</span>
+                                                </span>
+                                            ) : (
+                                                <span>Start Smart Matching</span>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {/* 计算结果展示 */}
+                                {result && !loading && (
+                                    <div className="mt-8 p-6 rounded-xl bg-slate-950 border border-slate-800 animate-fade-in">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">AI Recommendation</span>
+                                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium flex items-center space-x-1">
+                                                <i data-lucide="check-circle-2" className="w-3 h-3"></i>
+                                                <span>Confidence {result.confidence}</span>
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
+                                                <span className="text-xs text-slate-400">Recommended Size</span>
+                                                <p className="text-2xl font-bold text-white mt-1">{result.size}</p>
+                                            </div>
+                                            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
+                                                <span className="text-xs text-slate-400">Fit Advice</span>
+                                                <p className="text-lg font-semibold text-white mt-1">{result.fit}</p>
+                                            </div>
+                                            {result.extra && (
+                                                <div className="sm:col-span-2 p-4 rounded-lg bg-slate-900 border border-slate-800">
+                                                    <span className="text-xs text-slate-400">Additional Details</span>
+                                                    <p className="text-sm text-slate-300 mt-1">{result.extra}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 4. 系统技术架构与流程 (Mermaid) */}
+                    <section id="architecture" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-white">System Architecture & Workflow</h2>
+                            <p className="text-slate-400 mt-2">Modern high-concurrency microservices design with React, Go Gin & MySQL</p>
+                        </div>
+                        <div className="bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800 overflow-x-auto flex justify-center">
+                            <ArchitectureDiagram />
+                        </div>
+                    </section>
+
+                    {/* 5. 常见问题 (FAQ) */}
+                    <section id="faq" className="py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-white">Frequently Asked Questions</h2>
+                            <p className="text-slate-400 mt-2">Common questions about ChinaFit AI size recommendations</p>
+                        </div>
+                        <div className="space-y-4">
+                            {[
+                                { q: "How accurate is ChinaFit AI?", a: "Based on millions of Asian body measurements and advanced deep learning models, our overall size recommendation accuracy exceeds 95%." },
+                                { q: "Which brands are supported for size conversion?", a: "We support automatic alignment of standard size data for over a hundred mainstream sports, streetwear, and luxury brands." },
+                                { q: "Is my privacy protected?", a: "We use strict encryption. All body data you enter is used only for real-time calculation and is never shared with third parties." }
+                            ].map((faq, index) => (
+                                <div key={index} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                                        className="w-full px-6 py-4 text-left font-medium text-white flex justify-between items-center hover:bg-slate-800 transition-colors">
+                                        <span>{faq.q}</span>
+                                        <i data-lucide={openFaq === index ? "chevron-up" : "chevron-down"} className="w-5 h-5 text-slate-400"></i>
+                                    </button>
+                                    {openFaq === index && (
+                                        <div className="px-6 pb-4 text-sm text-slate-400 border-t border-slate-800/60 pt-3 animate-fade-in">
+                                            {faq.a}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="mt-auto border-t border-slate-800 bg-slate-950 py-8 text-center text-sm text-slate-500">
+                        © 2026 ChinaFit AI. All rights reserved. Powered by React, Go Gin & MySQL.
+                    </footer>
+
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
