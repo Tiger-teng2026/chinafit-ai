@@ -113,6 +113,7 @@
                 const token = localStorage.getItem('chinafit_pro_token') || '';
 
                 try {
+                    // 正确区分品类，Pants 使用 waist 而不是 weight
                     let payload;
                     if (activeTab === 'shoes') {
                         payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
@@ -167,8 +168,6 @@
                 const endIdx = markdown.indexOf(endMarker);
                 if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
                 const section = markdown.slice(startIdx + startMarker.length, endIdx).trim();
-                // 提取中文句子：找到第一个中文括号或中文分号前的内容，或者全部
-                // 简单处理：返回整个section，前端显示时再处理
                 return section;
             };
 
@@ -178,21 +177,15 @@
             const copySellerMsg = () => {
                 if (sellerMsgSection) {
                     // 提取纯中文句子（去掉英文翻译和Markdown符号）
-                    // 简单方法：移除英文翻译部分（括号内的英文），保留中文
-                    const chineseOnly = sellerMsgSection
-                        .replace(/\*.*?\*/g, '') // 去除Markdown强调
-                        .replace(/\(.*?English translation:.*?\)/gi, '') // 移除英文翻译括号
-                        .replace(/[A-Za-z0-9\/\.\,\!\?\:\(\)\-\s]*/g, '') // 移除英文字符和数字（粗略）
-                        .trim();
-                    // 更稳健：只提取含中文的行
                     const lines = sellerMsgSection.split('\n');
                     const chineseLines = lines.filter(line => /[\u4e00-\u9fa5]/.test(line));
                     const chineseMsg = chineseLines.join(' ').replace(/[*_`>#]/g, '').trim();
-                    const finalMsg = chineseMsg || chineseOnly;
-                    navigator.clipboard.writeText(finalMsg).then(() => {
-                        setSellerMsgCopied(true);
-                        setTimeout(() => setSellerMsgCopied(false), 2000);
-                    }).catch(err => console.error('Copy failed:', err));
+                    if (chineseMsg) {
+                        navigator.clipboard.writeText(chineseMsg).then(() => {
+                            setSellerMsgCopied(true);
+                            setTimeout(() => setSellerMsgCopied(false), 2000);
+                        }).catch(err => console.error('Copy failed:', err));
+                    }
                 }
             };
 
@@ -207,6 +200,23 @@
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
                 return `<pre class="text-slate-400 whitespace-pre-wrap">${escaped}</pre>`;
+            };
+
+            // 生成快速参考文本，根据品类和输入值动态返回
+            const getQuickReference = () => {
+                if (activeTab === 'shoes') {
+                    return 'Compare seller\'s reply with your report: Insole length 26.0–26.5 cm (snug) or 26.5–27.0 cm (comfortable); Insole width 9.5–10.0 cm. If insole <26.0 cm, size up.';
+                } else if (activeTab === 'tops') {
+                    return 'Compare seller\'s reply with your report: Chest 104–112 cm (regular) / 112–120 cm (oversized); Shoulder 44–46 cm (regular) / 47–50 cm (oversized); Sleeve 62–66 cm; Length 68–74 cm. Cotton may shrink 3-5% — consider sizing up.';
+                } else if (activeTab === 'pants') {
+                    const waistNum = parseFloat(inputVal2) || 75;
+                    const heightNum = parseFloat(inputVal1) || 175;
+                    const waistTargetMin = (waistNum + 2).toFixed(1);
+                    const waistTargetMax = (waistNum + 4).toFixed(1);
+                    const inseamTarget = heightNum >= 180 ? '80-85 cm' : heightNum >= 170 ? '75-80 cm' : '70-75 cm';
+                    return `Compare seller's reply with your report: Waist (half circumference) should be ${waistTargetMin}–${waistTargetMax} cm (your waist ${waistNum} cm + 2-4 cm comfort). Inseam length recommended ${inseamTarget} for your height. Check hip width if provided (typically 96-102 cm for standard fit).`;
+                }
+                return '';
             };
 
             return (
@@ -364,6 +374,11 @@
                                                         <div className="text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap">
                                                             {sellerMsgSection}
                                                         </div>
+                                                        {getQuickReference() && (
+                                                            <p className="text-xs text-slate-500 mt-2">
+                                                                <span className="font-semibold text-slate-400">📏 Quick Reference:</span> {getQuickReference()}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 )}
                                             </>
