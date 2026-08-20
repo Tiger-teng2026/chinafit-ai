@@ -121,7 +121,12 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 
 **CRITICAL RULES (MUST FOLLOW)**:
 - You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, or examples) is STRICTLY FORBIDDEN.
-- If you need to reference a Chinese term, you must translate it or describe it in English. For example, say "insole length" instead of "鞋垫长度".
+- EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
+  ---SELLER_MESSAGE_START---
+  **Seller Message (Copy-Paste to Taobao/1688):**  
+  [Chinese sentence asking about insole length and fit]
+  *(English translation: [English sentence])*
+  ---SELLER_MESSAGE_END---
 - Only mention these platforms: Taobao, JD.com, Poizon/Dewu, 1688. Do not mention any other platforms.
 - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
 - Avoid random characters, symbols, or formatting artifacts.
@@ -139,11 +144,11 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are ChinaFit AI sizing expert. You must respond ONLY in English. Any use of Chinese characters is absolutely prohibited. Always output valid English markdown only.'
+                        content: 'You are ChinaFit AI sizing expert. You must respond ONLY in English, except for the seller message section which may contain Chinese.'
                     },
                     { role: 'user', content: prompt }
                 ],
-                temperature: 0.3,  // 降低随机性，减少中文出现的概率
+                temperature: 0.3,
                 max_tokens: 1500
             })
         });

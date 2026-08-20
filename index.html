@@ -63,6 +63,7 @@
             const [isProUser, setIsProUser] = useState(false);
             const [errorMsg, setErrorMsg] = useState('');
             const [copied, setCopied] = useState(false);
+            const [sellerMsgCopied, setSellerMsgCopied] = useState(false);
 
             // 使用 useMemo 惰性创建 Showdown 转换器
             const converter = useMemo(() => {
@@ -98,6 +99,7 @@
                 setResult(null);
                 setErrorMsg('');
                 setCopied(false);
+                setSellerMsgCopied(false);
             };
 
             const handleCalculate = async (e) => {
@@ -106,11 +108,11 @@
                 setErrorMsg('');
                 setResult(null);
                 setCopied(false);
+                setSellerMsgCopied(false);
 
                 const token = localStorage.getItem('chinafit_pro_token') || '';
 
                 try {
-                    // 正确区分品类，Pants 使用 waist 而不是 weight
                     let payload;
                     if (activeTab === 'shoes') {
                         payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
@@ -144,7 +146,7 @@
                 }
             };
 
-            // 复制报告纯文本
+            // 复制完整报告（Markdown原文）
             const copyReport = () => {
                 if (result && result.proAnalysis) {
                     navigator.clipboard.writeText(result.proAnalysis).then(() => {
@@ -153,6 +155,44 @@
                     }).catch(err => {
                         console.error('Copy failed:', err);
                     });
+                }
+            };
+
+            // 提取客服模板（中文部分）
+            const extractSellerMessage = (markdown) => {
+                if (!markdown) return null;
+                const startMarker = '---SELLER_MESSAGE_START---';
+                const endMarker = '---SELLER_MESSAGE_END---';
+                const startIdx = markdown.indexOf(startMarker);
+                const endIdx = markdown.indexOf(endMarker);
+                if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
+                const section = markdown.slice(startIdx + startMarker.length, endIdx).trim();
+                // 提取中文句子：找到第一个中文括号或中文分号前的内容，或者全部
+                // 简单处理：返回整个section，前端显示时再处理
+                return section;
+            };
+
+            const sellerMsgSection = result?.proAnalysis ? extractSellerMessage(result.proAnalysis) : null;
+
+            // 复制客服中文模板
+            const copySellerMsg = () => {
+                if (sellerMsgSection) {
+                    // 提取纯中文句子（去掉英文翻译和Markdown符号）
+                    // 简单方法：移除英文翻译部分（括号内的英文），保留中文
+                    const chineseOnly = sellerMsgSection
+                        .replace(/\*.*?\*/g, '') // 去除Markdown强调
+                        .replace(/\(.*?English translation:.*?\)/gi, '') // 移除英文翻译括号
+                        .replace(/[A-Za-z0-9\/\.\,\!\?\:\(\)\-\s]*/g, '') // 移除英文字符和数字（粗略）
+                        .trim();
+                    // 更稳健：只提取含中文的行
+                    const lines = sellerMsgSection.split('\n');
+                    const chineseLines = lines.filter(line => /[\u4e00-\u9fa5]/.test(line));
+                    const chineseMsg = chineseLines.join(' ').replace(/[*_`>#]/g, '').trim();
+                    const finalMsg = chineseMsg || chineseOnly;
+                    navigator.clipboard.writeText(finalMsg).then(() => {
+                        setSellerMsgCopied(true);
+                        setTimeout(() => setSellerMsgCopied(false), 2000);
+                    }).catch(err => console.error('Copy failed:', err));
                 }
             };
 
@@ -290,23 +330,43 @@
                                         </div>
 
                                         {result.isPro ? (
-                                            <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-xl border border-red-500/40 shadow-xl">
-                                                <div className="flex items-center justify-between text-red-400 text-sm font-bold mb-4 pb-2 border-b border-slate-800">
-                                                    <div className="flex items-center space-x-2">
-                                                        <span>✨ DeepSeek AI Expert Deep Breakdown</span>
+                                            <>
+                                                <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-xl border border-red-500/40 shadow-xl">
+                                                    <div className="flex items-center justify-between text-red-400 text-sm font-bold mb-4 pb-2 border-b border-slate-800">
+                                                        <div className="flex items-center space-x-2">
+                                                            <span>✨ DeepSeek AI Expert Deep Breakdown</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={copyReport}
+                                                            className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                                                        >
+                                                            {copied ? '✓ Copied' : '📋 Copy Full Report'}
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        onClick={copyReport}
-                                                        className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
-                                                    >
-                                                        {copied ? '✓ Copied' : '📋 Copy Text'}
-                                                    </button>
+                                                    <div
+                                                        className="markdown-content"
+                                                        dangerouslySetInnerHTML={{ __html: getHtmlContent(result.proAnalysis) }}
+                                                    />
                                                 </div>
-                                                <div
-                                                    className="markdown-content"
-                                                    dangerouslySetInnerHTML={{ __html: getHtmlContent(result.proAnalysis) }}
-                                                />
-                                            </div>
+
+                                                {/* 客服模板卡片 */}
+                                                {sellerMsgSection && (
+                                                    <div className="bg-slate-900 p-5 rounded-xl border border-emerald-500/30 shadow-lg">
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <h3 className="text-sm font-bold text-emerald-400">💬 Seller Message Template (Copy-Paste to Taobao/1688)</h3>
+                                                            <button
+                                                                onClick={copySellerMsg}
+                                                                className="px-3 py-1 text-xs font-semibold rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 transition"
+                                                            >
+                                                                {sellerMsgCopied ? '✓ Copied' : '📋 Copy Chinese'}
+                                                            </button>
+                                                        </div>
+                                                        <div className="text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap">
+                                                            {sellerMsgSection}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
                                         ) : (
                                             <div className="relative overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 p-6 text-center">
                                                 <div className="text-2xl mb-2">🔒</div>
