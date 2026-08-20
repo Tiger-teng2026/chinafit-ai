@@ -140,7 +140,7 @@ module.exports = async function handler(req, res) {
             { role: 'user', content: prompt }
           ],
           temperature: 0.6,
-          max_tokens: 1200
+          max_tokens: 1500
         })
       });
   
