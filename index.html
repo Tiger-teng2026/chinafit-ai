@@ -7,9 +7,10 @@
     <!-- SEO & Social Media Share Meta -->
     <title>ChinaFit AI - Chinese Size Converter for Taobao, Poizon & 1688</title>
     <meta name="description" content="Never buy the wrong size again. Convert foot length, weight & waist into exact Taobao, Poizon & 1688 sizes with DeepSeek AI analysis.">
+    <link rel="canonical" href="https://www.chinafitai.com/" />
     <meta property="og:title" content="ChinaFit AI - Smart Cross-Border Size Calculator">
     <meta property="og:description" content="Accurate shoe and clothing size conversions for cross-border shopping on Taobao, Dewu, and 1688.">
-    <meta property="og:url" content="https://chinafit-ai.vercel.app">
+    <meta property="og:url" content="https://www.chinafitai.com/">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -109,7 +110,7 @@
                 const token = localStorage.getItem('chinafit_pro_token') || '';
 
                 try {
-                    // 修复：正确区分品类，Pants 使用 waist 而不是 weight
+                    // 正确区分品类，Pants 使用 waist 而不是 weight
                     let payload;
                     if (activeTab === 'shoes') {
                         payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
