@@ -225,9 +225,9 @@
                 return `<pre class="text-slate-400 whitespace-pre-wrap">${escaped}</pre>`;
             };
 
-            // 关键提示：引导用户信任 AI 报告而非卖家建议
+            // 关键提示：中立表述，降低法律风险
             const getQuickReference = () => {
-                return 'Trust the AI report\'s measurement targets over seller suggestions. Chinese sellers may not be familiar with Western body types. Compare the seller\'s reply with Section 3 of the report, and if measurements match your target range, proceed with confidence.';
+                return 'Use the target measurements in Section 3 as a baseline to cross-check the seller\'s actual flat-lay dimensions. Always account for standard manufacturing tolerances (±1–2 cm) before finalizing your order.';
             };
 
             return (
@@ -360,7 +360,10 @@
                     </main>
 
                     <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-                        © 2026 ChinaFit AI · Built with React & DeepSeek Engine
+                        <p>© 2026 ChinaFit AI · Built with React & DeepSeek Engine</p>
+                        <p className="text-[11px] text-slate-600 mt-2 max-w-xl mx-auto px-4">
+                            Disclaimer: ChinaFit AI provides size estimations for reference only. Actual garment and shoe dimensions may vary by manufacturer tolerances (±1–2 cm).
+                        </p>
                     </footer>
                 </div>
             );
