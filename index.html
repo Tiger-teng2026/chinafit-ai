@@ -203,18 +203,15 @@
                 const startMarkers = ['---SELLER_MESSAGE_START---', '---SELLERMESSAGESTART---'];
                 const endMarkers = ['---SELLER_MESSAGE_END---', '---SELLERMESSAGEEND---'];
                 
-                // 循环移除所有可能的标记块
                 for (let i = 0; i < startMarkers.length; i++) {
                     for (let j = 0; j < endMarkers.length; j++) {
                         const parts = cleanMarkdown.split(startMarkers[i]);
                         if (parts.length > 1) {
-                            // 从第一个标记之后开始，找到对应的结束标记
                             for (let k = 1; k < parts.length; k++) {
                                 const endIdx = parts[k].indexOf(endMarkers[j]);
                                 if (endIdx !== -1) {
                                     parts[k] = parts[k].slice(endIdx + endMarkers[j].length);
                                 } else {
-                                    // 如果没有找到结束标记，则删除该部分之后的所有内容
                                     parts[k] = '';
                                 }
                             }
@@ -228,8 +225,9 @@
                 return `<pre class="text-slate-400 whitespace-pre-wrap">${escaped}</pre>`;
             };
 
+            // 关键提示：引导用户信任 AI 报告而非卖家建议
             const getQuickReference = () => {
-                return 'Compare the seller\'s reply with the measurement targets in your report above (Section 3). If measurements match your target range, proceed with confidence.';
+                return 'Trust the AI report\'s measurement targets over seller suggestions. Chinese sellers may not be familiar with Western body types. Compare the seller\'s reply with Section 3 of the report, and if measurements match your target range, proceed with confidence.';
             };
 
             return (
