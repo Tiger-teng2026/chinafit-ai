@@ -130,6 +130,7 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
   - All garment measurements in Section 3 and in the seller message must be **flat-lay (one side, half of full circumference)** values, because that is how Chinese sellers usually provide them.
   - Do NOT give full circumference values as flat-lay. For example, for a user with 75 cm waist, the flat waist target should be about 38–40 cm (not 76–80 cm). Similar conversion should be applied for hip and thigh: half of full circumference plus 2–4 cm ease.
   - In the report, clearly label measurements as "flat-lay" and provide both the flat target and the full circumference equivalent if helpful, but ensure the primary target is flat.
+  - In the Chinese seller message, for pants, ask for "内长（裆底到脚口）" instead of just "裤长", and ask for "平铺腰围、臀围、大腿围、内长" to ensure the seller understands you want flat measurements and inseam length.
 - EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
   ---SELLER_MESSAGE_START---
   **Seller Message (Copy-Paste to Taobao/1688):**  
@@ -141,11 +142,12 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
   2. Ask ONLY for the product's objective measurements for the recommended size. The recommended size is: ${baseResult.recommendedSize}. Use appropriate units:
      - For shoes: Ask for the insole length and widest width in mm for the recommended size. The question should reference the exact EU size, e.g., "EU42码". Do NOT include US size or descriptive text like "EU 42 / US 8.5".
      - For tops: Ask for chest, shoulder, length, and sleeve in cm for the recommended size. The question should reference the exact letter size, e.g., "L码". Do NOT include "CN / Asian Size" or any descriptive text.
-     - For pants: Ask for waist, hip, inseam, and thigh in cm for the recommended size. The question should reference the exact waist size, e.g., "31码". Do NOT include "(US) / 78cm" or any descriptive text.
+     - For pants: Ask for waist, hip, inseam (内长), and thigh in cm for the recommended size. The question should reference the exact waist size, e.g., "31码". Do NOT include "(US) / 78cm" or any descriptive text. Use "平铺腰围、臀围、大腿围、内长" in the question.
   3. Do NOT ask the seller to recommend a different size, and do NOT ask questions like "should I buy size X?" or "what size do you recommend?". The buyer will decide based on the measurements.
-  4. Avoid subjective phrases that invite opinions, such as "想确认一下尺寸是否合适", "您觉得合适吗", or similar. Only provide body measurements and ask for objective product measurements.
-  5. Avoid duplicate questions about the same measurement. Combine into one clear question.
-  6. Keep the Chinese sentence polite and concise.
+  4. Avoid subjective phrases that invite opinions, such as "想确认一下尺寸是否合适", "想确认一下具体尺寸", "您觉得合适吗", "请问我穿这个码合适吗", or any sentence that asks the seller to judge the fit. Only provide body measurements and ask for objective product measurements.
+  5. End the Chinese message with "谢谢" or a polite closing like "谢谢！". Do not add any extra sentences after the question about measurements.
+  6. Avoid duplicate questions about the same measurement. Combine into one clear question.
+  7. Keep the Chinese sentence polite and concise.
 - Only mention these platforms: Taobao, JD.com, Poizon/Dewu, 1688. Do not mention any other platforms.
 - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
 - Avoid random characters, symbols, or formatting artifacts.
