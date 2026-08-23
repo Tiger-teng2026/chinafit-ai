@@ -123,7 +123,7 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 - You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, or examples) is STRICTLY FORBIDDEN.
 - This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)".
 - **Units must be consistent with the input field units for the category**:
-  - For shoes: ALL length and width measurements (foot length, foot width, insole length, insole width, outsole length, etc.) MUST be in millimeters (mm). Do NOT convert to centimeters. Example: say "260 mm" not "26.0 cm".
+  - For shoes: ALL length and width measurements MUST be in millimeters (mm). Do NOT convert to centimeters. Example: say "260 mm" not "26.0 cm".
   - For tops and pants: ALL body and garment measurements MUST be in centimeters (cm) as provided (height, weight, chest, waist, etc.). Do NOT convert to other units.
   - Heel-to-toe drop is an exception and may be given in millimeters (mm) if conventional, but for shoes it should also be in mm only.
 - EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
@@ -136,12 +136,13 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
   1. Provide the buyer's body measurements using the SAME units as the input fields (for shoes: mm, for clothing: cm). For example, "脚长260毫米，脚宽95毫米" for shoes, or "身高175厘米，体重70公斤" for tops.
   2. Ask ONLY for the product's objective measurements for the recommended size. The recommended size is: ${baseResult.recommendedSize}. Use appropriate units:
      - For shoes: "请问这款鞋EU42码的鞋垫实际长度和最宽处分别是多少毫米？"
-     - For tops: "请问这款衣服L码的胸围、肩宽、衣长分别是多少厘米？"
+     - For tops: "请问这款衣服L码的胸围、肩宽、衣长、袖长分别是多少厘米？"
      - For pants: "请问这款裤子32码的腰围、臀围、裤长分别是多少厘米？"
      Adapt the size and measurements to the actual category.
   3. Do NOT ask the seller to recommend a different size, and do NOT ask questions like "should I buy size X?" or "what size do you recommend?". The buyer will decide based on the measurements.
-  4. Avoid duplicate questions about the same measurement. For example, do not ask for "鞋垫长度和宽度" and then separately ask for "鞋垫最宽处". Combine into one clear question.
-  5. Keep the Chinese sentence polite and concise.
+  4. Avoid subjective phrases that invite opinions, such as "想确认一下尺寸是否合适", "您觉得合适吗", or similar. Only provide body measurements and ask for objective product measurements.
+  5. Avoid duplicate questions about the same measurement. Combine into one clear question.
+  6. Keep the Chinese sentence polite and concise.
 - Only mention these platforms: Taobao, JD.com, Poizon/Dewu, 1688. Do not mention any other platforms.
 - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
 - Avoid random characters, symbols, or formatting artifacts.

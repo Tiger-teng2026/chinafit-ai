@@ -253,7 +253,8 @@
             };
 
             const getQuickReference = () => {
-                return 'Use the target measurements in Section 3 as a baseline to cross-check the seller\'s actual flat-lay dimensions. Always account for standard manufacturing tolerances (±5–10 mm) before finalizing your order.';
+                const tolerance = activeTab === 'shoes' ? '±5–10 mm' : '±1–2 cm';
+                return `Use the target measurements in Section 3 as a baseline to cross-check the seller's actual flat-lay dimensions. Always account for standard manufacturing tolerances (${tolerance}) before finalizing your order.`;
             };
 
             // 免费用户看到的模糊预览内容
@@ -423,7 +424,7 @@
                     <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
                         <p>© 2026 ChinaFit AI · Built with React & DeepSeek Engine</p>
                         <p className="text-[11px] text-slate-600 mt-2 max-w-xl mx-auto px-4">
-                            Disclaimer: ChinaFit AI provides size estimations for reference only. Actual garment and shoe dimensions may vary by manufacturer tolerances (±5–10 mm).
+                            Disclaimer: ChinaFit AI provides size estimations for reference only. Actual garment and shoe dimensions may vary by manufacturer tolerances (typically ±5–10 mm for shoes and ±1–2 cm for clothing).
                         </p>
                     </footer>
                 </div>
