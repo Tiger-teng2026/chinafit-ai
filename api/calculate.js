@@ -126,6 +126,10 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
   - For shoes: ALL length and width measurements MUST be in millimeters (mm). Do NOT convert to centimeters. Example: say "260 mm" not "26.0 cm".
   - For tops and pants: ALL body and garment measurements MUST be in centimeters (cm) as provided (height, weight, chest, waist, etc.). Do NOT convert to other units.
   - Heel-to-toe drop is an exception and may be given in millimeters (mm) if conventional, but for shoes it should also be in mm only.
+- **IMPORTANT for Pants measurements**:
+  - All garment measurements in Section 3 and in the seller message must be **flat-lay (one side, half of full circumference)** values, because that is how Chinese sellers usually provide them.
+  - Do NOT give full circumference values as flat-lay. For example, for a user with 75 cm waist, the flat waist target should be about 38–40 cm (not 76–80 cm). Similar conversion should be applied for hip and thigh: half of full circumference plus 2–4 cm ease.
+  - In the report, clearly label measurements as "flat-lay" and provide both the flat target and the full circumference equivalent if helpful, but ensure the primary target is flat.
 - EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
   ---SELLER_MESSAGE_START---
   **Seller Message (Copy-Paste to Taobao/1688):**  
