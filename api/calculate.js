@@ -120,8 +120,8 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 4. **Tailored Advice** (Shrinkage risk, loose vs slim cut recommendation).
 
 **CRITICAL RULES (MUST FOLLOW)**:
-- You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, or examples) is STRICTLY FORBIDDEN.
-- This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)".
+- You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, examples, table headers, or ANY other part of the main report) is STRICTLY FORBIDDEN.
+- This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)". Similarly, do NOT write "Waist (平铺腰围)" — instead write "Waist (flat-lay)".
 - **Units must be consistent with the input field units for the category**:
   - For shoes: ALL length and width measurements MUST be in millimeters (mm). Do NOT convert to centimeters. Example: say "260 mm" not "26.0 cm".
   - For tops and pants: ALL body and garment measurements MUST be in centimeters (cm) as provided (height, weight, chest, waist, etc.). Do NOT convert to other units.
