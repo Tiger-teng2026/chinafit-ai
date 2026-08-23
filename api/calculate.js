@@ -116,21 +116,22 @@ ${promptContext}
 Please provide an in-depth, structured sizing breakdown in clear English markdown:
 1. **Precise Size Conversion** (CN / EU / US / UK).
 2. **Platform Specific Fit Warnings** (Taobao/1688 sizing vs Poizon streetwear sizing).
-3. **Key Measurements to Check** (e.g. Chest/Shoulder in cm; Insole in mm).
+3. **Key Measurements to Check** (e.g. Chest/Shoulder/Insole in cm).
 4. **Tailored Advice** (Shrinkage risk, loose vs slim cut recommendation).
 
 **CRITICAL RULES (MUST FOLLOW)**:
 - You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, or examples) is STRICTLY FORBIDDEN.
+- This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)".
 - EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
   ---SELLER_MESSAGE_START---
   **Seller Message (Copy-Paste to Taobao/1688):**  
   [Chinese sentence asking about measurements]
   *(English translation: [English sentence])*
   ---SELLER_MESSAGE_END---
-- **IMPORTANT** Inside the Chinese seller message:
-  1. Provide the buyer's body measurements (e.g., foot length, foot width, height, weight, waist). For shoes, foot length (脚长) and foot width (脚宽) MUST use millimeters (毫米 / mm), never centimeters (厘米 / cm).
+- Inside the Chinese seller message:
+  1. Provide the buyer's body measurements (e.g., foot length, foot width, height, weight, waist).
   2. Ask ONLY for the product's objective measurements for the recommended size. The recommended size is: ${baseResult.recommendedSize}. For example:
-     - For shoes: "请问这款鞋偏码吗？EU42码的鞋垫实际长度和宽度分别是多少毫米？"
+     - For shoes: "请问这款鞋偏码吗？EU42码的鞋垫实际长度和宽度分别是多少厘米？"
      - For tops: "请问这款衣服偏码吗？L码的胸围、肩宽、衣长分别是多少厘米？"
      - For pants: "请问这款裤子偏码吗？32码的腰围、臀围、裤长分别是多少厘米？"
      Adapt the size and measurements to the actual category.
