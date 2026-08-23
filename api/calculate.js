@@ -122,6 +122,7 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 **CRITICAL RULES (MUST FOLLOW)**:
 - You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, or examples) is STRICTLY FORBIDDEN.
 - This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)".
+- Use consistent units throughout the report: centimeters (cm) for all length and width measurements. Heel-to-toe drop is an exception and may be given in millimeters (mm) if conventional, but do not mix cm and mm for the same type of measurement.
 - EXCEPTION: At the very end of your response, include a special section for the buyer to copy and send to the seller. This section MAY contain Chinese text. Format it EXACTLY as follows:
   ---SELLER_MESSAGE_START---
   **Seller Message (Copy-Paste to Taobao/1688):**  
@@ -136,7 +137,8 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
      - For pants: "请问这款裤子偏码吗？32码的腰围、臀围、裤长分别是多少厘米？"
      Adapt the size and measurements to the actual category.
   3. Do NOT ask the seller to recommend a different size, and do NOT ask questions like "should I buy size X?" or "what size do you recommend?". The buyer will decide based on the measurements.
-  4. Keep the Chinese sentence polite and concise.
+  4. Avoid subjective phrases like "想确认一下尺码是否合适" that might invite opinions. Only provide body measurements and ask for objective product measurements.
+  5. Keep the Chinese sentence polite and concise.
 - Only mention these platforms: Taobao, JD.com, Poizon/Dewu, 1688. Do not mention any other platforms.
 - Use standard English brand names (e.g., "New Balance", not "新平衡牌鞋").
 - Avoid random characters, symbols, or formatting artifacts.
