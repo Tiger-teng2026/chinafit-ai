@@ -135,10 +135,9 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 - Inside the Chinese seller message:
   1. Provide the buyer's body measurements using the SAME units as the input fields (for shoes: mm, for clothing: cm). For example, "脚长260毫米，脚宽95毫米" for shoes, or "身高175厘米，体重70公斤" for tops.
   2. Ask ONLY for the product's objective measurements for the recommended size. The recommended size is: ${baseResult.recommendedSize}. Use appropriate units:
-     - For shoes: "请问这款鞋EU42码的鞋垫实际长度和最宽处分别是多少毫米？"
-     - For tops: "请问这款衣服L码的胸围、肩宽、衣长、袖长分别是多少厘米？"
-     - For pants: "请问这款裤子32码的腰围、臀围、裤长分别是多少厘米？"
-     Adapt the size and measurements to the actual category.
+     - For shoes: Ask for the insole length and widest width in mm for the recommended size. The question should reference the exact EU size, e.g., "EU42码". Do NOT include US size or descriptive text like "EU 42 / US 8.5".
+     - For tops: Ask for chest, shoulder, length, and sleeve in cm for the recommended size. The question should reference the exact letter size, e.g., "L码". Do NOT include "CN / Asian Size" or any descriptive text.
+     - For pants: Ask for waist, hip, inseam, and thigh in cm for the recommended size. The question should reference the exact waist size, e.g., "31码". Do NOT include "(US) / 78cm" or any descriptive text.
   3. Do NOT ask the seller to recommend a different size, and do NOT ask questions like "should I buy size X?" or "what size do you recommend?". The buyer will decide based on the measurements.
   4. Avoid subjective phrases that invite opinions, such as "想确认一下尺寸是否合适", "您觉得合适吗", or similar. Only provide body measurements and ask for objective product measurements.
   5. Avoid duplicate questions about the same measurement. Combine into one clear question.
