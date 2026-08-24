@@ -24,4 +24,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  </urlset>
+  <url>
+    <loc>https://www.chinafitai.com/blog/chinese-shoe-size-conversion.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
