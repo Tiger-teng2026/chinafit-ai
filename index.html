@@ -5,8 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <!-- Core SEO Meta Tags -->
-        <title>ChinaFit AI - Chinese Size Converter for Taobao, Poizon & 1688</title>
-        <meta name="description" content="Never buy the wrong size again. Convert foot length, weight & waist into exact Taobao, Poizon & 1688 sizes with DeepSeek AI analysis.">
+        <title>Taobao Size Converter – Convert Chinese Clothing & Shoe Sizes to US/EU</title>
+        <meta name="description" content="Free AI-powered tool to convert Chinese shoe and clothing sizes from Taobao, 1688, Poizon to US, EU, UK sizes. Avoid size mistakes – get your perfect fit now.">
         <meta name="keywords" content="Taobao size converter, Poizon size chart, 1688 clothing size, Chinese shoe size calculator, Dewu size guide, cross-border shopping sizing">
         <link rel="canonical" href="https://www.chinafitai.com/" />
     
@@ -21,7 +21,57 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="ChinaFit AI - Smart Cross-Border Size Calculator">
         <meta name="twitter:description" content="Never buy the wrong size from Chinese shopping platforms again. Get exact sizing recommendations instantly.">
-    
+
+        <!-- Google Rich Snippets / Schema.org JSON-LD -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "ChinaFit AI",
+          "url": "https://www.chinafitai.com/",
+          "description": "Free AI-powered clothing and shoe size converter for overseas shoppers buying on Taobao, 1688, Poizon, and JD.com.",
+          "applicationCategory": "ShoppingApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": "4.99",
+            "priceCurrency": "USD"
+          }
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why do Chinese clothing sizes run smaller than US/EU sizes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Chinese clothing sizes are cut for Asian body proportions, meaning shoulder width, chest, and sleeve length are typically 1–2 sizes smaller than US/UK/EU standards. Always check flat measurements before ordering."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does ChinaFit AI convert Taobao and 1688 sizes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ChinaFit AI uses your personal measurements (height, weight, foot length, etc.) and compares them with the specific size chart from Taobao, 1688, Poizon, or JD.com to recommend the best fit."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I convert Chinese shoe sizes to US or EU sizes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Chinese shoe sizes usually use foot length in millimeters. For example, 260 mm is about EU 42 / US Men's 8.5. ChinaFit AI also considers foot width and instep height for a more accurate fit."
+              }
+            }
+          ]
+        }
+        </script>
+
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -428,6 +478,25 @@
                             </div>
                         </div>
                     </main>
+
+                    {/* FAQ 可见内容区块，提升 SEO 和用户信任 */}
+                    <section className="max-w-2xl mx-auto px-4 py-10">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h2>
+                        <div className="space-y-4 text-slate-300">
+                            <div>
+                                <h3 className="font-semibold text-white">Why do Chinese clothing sizes run smaller than US/EU sizes?</h3>
+                                <p className="text-sm mt-1">Chinese clothing is designed for Asian body proportions, so shoulder width, chest, and sleeve length are generally 1–2 sizes smaller than Western standards. Always check flat measurements before buying.</p>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-white">How does ChinaFit AI convert Taobao and 1688 sizes?</h3>
+                                <p className="text-sm mt-1">ChinaFit AI takes your personal measurements and compares them with the specific size chart from the listing to recommend the best fit, including warnings about platform-specific sizing quirks.</p>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-white">How do I convert Chinese shoe sizes to US or EU sizes?</h3>
+                                <p className="text-sm mt-1">Chinese shoe sizes use foot length in millimeters. For example, 260 mm = EU 42 / US Men's 8.5. ChinaFit AI also considers foot width for a precise recommendation.</p>
+                            </div>
+                        </div>
+                    </section>
 
                     <footer className="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
                         <p className="mb-3">
