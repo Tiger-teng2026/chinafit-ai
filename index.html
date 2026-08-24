@@ -1,57 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO & Social Media Share Meta -->
-    <title>ChinaFit AI - Chinese Size Converter for Taobao, Poizon & 1688</title>
-    <meta name="description" content="Never buy the wrong size again. Convert foot length, weight & waist into exact Taobao, Poizon & 1688 sizes with DeepSeek AI analysis.">
-    <link rel="canonical" href="https://www.chinafitai.com/" />
-    <meta property="og:title" content="ChinaFit AI - Smart Cross-Border Size Calculator">
-    <meta property="og:description" content="Accurate shoe and clothing size conversions for cross-border shopping on Taobao, Dewu, and 1688.">
-    <meta property="og:url" content="https://www.chinafitai.com/">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .china-red { color: #E60012; }
-        .bg-china-red { background-color: #E60012; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .markdown-content h1 { font-size: 1.3rem !important; font-weight: 800 !important; color: #ffffff !important; margin: 1.2rem 0 0.6rem 0 !important; }
-        .markdown-content h2 { font-size: 1.15rem !important; font-weight: 700 !important; color: #f87171 !important; margin: 1.4rem 0 0.6rem 0 !important; border-bottom: 1px solid #334155 !important; padding-bottom: 0.4rem !important; }
-        .markdown-content h3 { font-size: 1rem !important; font-weight: 600 !important; color: #e2e8f0 !important; margin: 1.1rem 0 0.4rem 0 !important; }
-        .markdown-content p { color: #cbd5e1 !important; font-size: 0.875rem !important; line-height: 1.65 !important; margin-bottom: 0.75rem !important; }
-        .markdown-content strong { color: #ffffff !important; font-weight: 700 !important; }
-        .markdown-content ul { list-style-type: disc !important; padding-left: 1.25rem !important; margin: 0.5rem 0 0.8rem 0 !important; color: #cbd5e1 !important; font-size: 0.875rem !important; }
-        .markdown-content li { margin-bottom: 0.35rem !important; }
-        .markdown-content table { width: 100% !important; border-collapse: collapse !important; margin: 1rem 0 !important; font-size: 0.825rem !important; background: rgba(15, 23, 42, 0.7) !important; border-radius: 8px !important; overflow: hidden !important; border: 1px solid #334155 !important; }
-        .markdown-content th { background-color: #1e293b !important; color: #f87171 !important; font-weight: 700 !important; text-align: left !important; padding: 0.6rem 0.75rem !important; border: 1px solid #334155 !important; }
-        .markdown-content td { padding: 0.55rem 0.75rem !important; border: 1px solid #334155 !important; color: #cbd5e1 !important; }
-        .markdown-content tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.4) !important; }
-        .markdown-content hr { border: 0 !important; border-top: 1px solid #334155 !important; margin: 1.5rem 0 !important; }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        /* 付费锁模糊效果 */
-        .blur-preview {
-            filter: blur(8px);
-            user-select: none;
-            pointer-events: none;
-        }
-    </style>
-</head>
+        <!-- Core SEO Meta Tags -->
+        <title>ChinaFit AI - Chinese Size Converter for Taobao, Poizon & 1688</title>
+        <meta name="description" content="Never buy the wrong size again. Convert foot length, weight & waist into exact Taobao, Poizon & 1688 sizes with DeepSeek AI analysis.">
+        <meta name="keywords" content="Taobao size converter, Poizon size chart, 1688 clothing size, Chinese shoe size calculator, Dewu size guide, cross-border shopping sizing">
+        <link rel="canonical" href="https://www.chinafitai.com/" />
+    
+        <!-- Open Graph / Social Media Share Meta Tags -->
+        <meta property="og:title" content="ChinaFit AI - Smart Cross-Border Size Calculator">
+        <meta property="og:description" content="Accurate shoe and clothing size conversions for cross-border shopping on Taobao, Dewu, and 1688 powered by DeepSeek AI.">
+        <meta property="og:url" content="https://www.chinafitai.com/">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="ChinaFit AI">
+    
+        <!-- Twitter Card Meta Tags -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="ChinaFit AI - Smart Cross-Border Size Calculator">
+        <meta name="twitter:description" content="Never buy the wrong size from Chinese shopping platforms again. Get exact sizing recommendations instantly.">
+    
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+        
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            body { font-family: 'Inter', sans-serif; }
+            .china-red { color: #E60012; }
+            .bg-china-red { background-color: #E60012; }
+            .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+    
+            .markdown-content h1 { font-size: 1.3rem !important; font-weight: 800 !important; color: #ffffff !important; margin: 1.2rem 0 0.6rem 0 !important; }
+            .markdown-content h2 { font-size: 1.15rem !important; font-weight: 700 !important; color: #f87171 !important; margin: 1.4rem 0 0.6rem 0 !important; border-bottom: 1px solid #334155 !important; padding-bottom: 0.4rem !important; }
+            .markdown-content h3 { font-size: 1rem !important; font-weight: 600 !important; color: #e2e8f0 !important; margin: 1.1rem 0 0.4rem 0 !important; }
+            .markdown-content p { color: #cbd5e1 !important; font-size: 0.875rem !important; line-height: 1.65 !important; margin-bottom: 0.75rem !important; }
+            .markdown-content strong { color: #ffffff !important; font-weight: 700 !important; }
+            .markdown-content ul { list-style-type: disc !important; padding-left: 1.25rem !important; margin: 0.5rem 0 0.8rem 0 !important; color: #cbd5e1 !important; font-size: 0.875rem !important; }
+            .markdown-content li { margin-bottom: 0.35rem !important; }
+            .markdown-content table { width: 100% !important; border-collapse: collapse !important; margin: 1rem 0 !important; font-size: 0.825rem !important; background: rgba(15, 23, 42, 0.7) !important; border-radius: 8px !important; overflow: hidden !important; border: 1px solid #334155 !important; }
+            .markdown-content th { background-color: #1e293b !important; color: #f87171 !important; font-weight: 700 !important; text-align: left !important; padding: 0.6rem 0.75rem !important; border: 1px solid #334155 !important; }
+            .markdown-content td { padding: 0.55rem 0.75rem !important; border: 1px solid #334155 !important; color: #cbd5e1 !important; }
+            .markdown-content tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.4) !important; }
+            .markdown-content hr { border: 0 !important; border-top: 1px solid #334155 !important; margin: 1.5rem 0 !important; }
+            
+            /* 付费锁模糊效果 */
+            .blur-preview {
+                filter: blur(8px);
+                user-select: none;
+                pointer-events: none;
+            }
+        </style>
+    </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-red-600 selection:text-white">
     <div id="root"></div>
 
