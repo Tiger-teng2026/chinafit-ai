@@ -2,6 +2,43 @@
 // 使用 CommonJS 导出，兼容 Vercel 默认环境
 // 免费用户走基础规则引擎，付费用户调用 DeepSeek 深度分析
 
+// 后处理函数：移除正文中的中文字符，但保留 seller message 部分的中文
+function removeChineseFromMainContent(content) {
+    const startMarkers = ['---SELLER_MESSAGE_START---', '---SELLERMESSAGESTART---'];
+    const endMarkers = ['---SELLER_MESSAGE_END---', '---SELLERMESSAGEEND---'];
+    let startIdx = -1, endIdx = -1, startMarker = '', endMarker = '';
+
+    // 查找 seller message 块
+    for (let i = 0; i < startMarkers.length; i++) {
+        const idx = content.indexOf(startMarkers[i]);
+        if (idx !== -1) {
+            startIdx = idx;
+            startMarker = startMarkers[i];
+            for (let j = 0; j < endMarkers.length; j++) {
+                const endIdxTmp = content.indexOf(endMarkers[j], idx + startMarker.length);
+                if (endIdxTmp !== -1) {
+                    endIdx = endIdxTmp;
+                    endMarker = endMarkers[j];
+                    break;
+                }
+            }
+            if (endIdx !== -1) break;
+        }
+    }
+
+    if (startIdx === -1 || endIdx === -1) {
+        // 没有 seller message 块，直接全文移除中文
+        return content.replace(/[\u4e00-\u9fa5]/g, '');
+    } else {
+        const sellerSection = content.slice(startIdx, endIdx + endMarker.length);
+        const mainBefore = content.slice(0, startIdx);
+        const mainAfter = content.slice(endIdx + endMarker.length);
+        const cleanBefore = mainBefore.replace(/[\u4e00-\u9fa5]/g, '');
+        const cleanAfter = mainAfter.replace(/[\u4e00-\u9fa5]/g, '');
+        return cleanBefore + sellerSection + cleanAfter;
+    }
+}
+
 module.exports = async function handler(req, res) {
     // 设置 CORS 头
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -120,7 +157,7 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
 4. **Tailored Advice** (Shrinkage risk, loose vs slim cut recommendation).
 
 **CRITICAL RULES (MUST FOLLOW)**:
-- You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, examples, table headers, or ANY other part of the main report) is STRICTLY FORBIDDEN.
+- You are ONLY allowed to respond in English. Using any Chinese characters, pinyin, or non-English scripts (including inside parentheses, annotations, examples, table headers, table cells, or ANY other part of the main report) is STRICTLY FORBIDDEN.
 - This rule applies to the ENTIRE main report body. Do NOT add Chinese translations or annotations next to English terms. For example, write "Insole Length" only, NOT "Insole Length (鞋垫长度)". Similarly, do NOT write "Waist (平铺腰围)" — instead write "Waist (flat-lay)".
 - **Units must be consistent with the input field units for the category**:
   - For shoes: ALL length and width measurements MUST be in millimeters (mm). Do NOT convert to centimeters. Example: say "260 mm" not "26.0 cm".
@@ -181,7 +218,9 @@ Please provide an in-depth, structured sizing breakdown in clear English markdow
             throw new Error(aiData.error?.message || 'Failed to call DeepSeek API');
         }
 
-        const proAnalysis = aiData.choices?.[0]?.message?.content || 'AI analysis completed.';
+        let proAnalysis = aiData.choices?.[0]?.message?.content || 'AI analysis completed.';
+        // 后处理：移除正文中的中文字符，保留 seller message 部分的中文
+        proAnalysis = removeChineseFromMainContent(proAnalysis);
 
         return res.status(200).json({
             isPro: true,
