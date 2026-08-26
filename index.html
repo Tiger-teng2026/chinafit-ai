@@ -108,6 +108,21 @@
                 user-select: none;
                 pointer-events: none;
             }
+
+            .early-access-overlay {
+                animation: overlayIn 0.22s ease-out;
+            }
+            .early-access-modal {
+                animation: modalIn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes overlayIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes modalIn {
+                from { opacity: 0; transform: translateY(14px) scale(0.96); }
+                to { opacity: 1; transform: translateY(0) scale(1); }
+            }
         </style>
     </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-red-600 selection:text-white">
@@ -115,8 +130,6 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
-
-        const CREEM_PAYMENT_URL = 'https://www.creem.io/payment/prod_2oD95EVLaTLVVVpIi9brWq';
 
         function App() {
             const [activeTab, setActiveTab] = useState('shoes');
@@ -128,6 +141,10 @@
             const [errorMsg, setErrorMsg] = useState('');
             const [copied, setCopied] = useState(false);
             const [sellerMsgCopied, setSellerMsgCopied] = useState(false);
+            const [showAccessModal, setShowAccessModal] = useState(false);
+            const [accessEmail, setAccessEmail] = useState('');
+            const [accessStatus, setAccessStatus] = useState('idle');
+            const [accessError, setAccessError] = useState('');
 
             const converter = useMemo(() => {
                 if (window.showdown) {
@@ -154,6 +171,82 @@
                     setIsProUser(true);
                 }
             }, []);
+
+            const closeAccessModal = () => {
+                setShowAccessModal(false);
+                setAccessEmail('');
+                setAccessStatus('idle');
+                setAccessError('');
+            };
+
+            const openAccessModal = (e) => {
+                if (e) e.preventDefault();
+                setAccessEmail('');
+                setAccessStatus('idle');
+                setAccessError('');
+                setShowAccessModal(true);
+            };
+
+            const recordEmailLocally = (email, extra = {}) => {
+                try {
+                    const key = 'chinafit_early_access_leads';
+                    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+                    existing.push({ email, submittedAt: new Date().toISOString(), ...extra });
+                    localStorage.setItem(key, JSON.stringify(existing));
+                } catch (err) {
+                    console.error('Could not store email locally:', err);
+                }
+            };
+
+            const handleAccessSubmit = async (e) => {
+                e.preventDefault();
+                const email = accessEmail.trim().toLowerCase();
+                const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+                if (!isValid) {
+                    setAccessError('Please enter a valid email address.');
+                    setAccessStatus('error');
+                    return;
+                }
+
+                setAccessStatus('submitting');
+                setAccessError('');
+
+                try {
+                    const response = await fetch('/api/early-access', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || 'Could not save your email. Please try again.');
+                    }
+
+                    recordEmailLocally(email);
+                    setAccessStatus('success');
+                } catch (err) {
+                    recordEmailLocally(email, { pendingSync: true });
+                    setAccessStatus('success');
+                }
+            };
+
+            useEffect(() => {
+                if (!showAccessModal) return;
+                const previousOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+
+                const onKeyDown = (event) => {
+                    if (event.key === 'Escape') closeAccessModal();
+                };
+                window.addEventListener('keydown', onKeyDown);
+
+                return () => {
+                    document.body.style.overflow = previousOverflow;
+                    window.removeEventListener('keydown', onKeyDown);
+                };
+            }, [showAccessModal]);
 
             const handleTabChange = (tab, val1, val2) => {
                 setActiveTab(tab);
@@ -339,12 +432,13 @@
                                 <p className="text-xs text-slate-400 mb-4 max-w-sm">
                                     Get exact insole / chest / waist targets, platform-specific warnings (Taobao vs Poizon), and a ready-to-send Chinese message to verify with the seller.
                                 </p>
-                                <a
-                                    href={CREEM_PAYMENT_URL}
+                                <button
+                                    type="button"
+                                    onClick={openAccessModal}
                                     className="inline-block px-6 py-2.5 rounded-lg bg-china-red hover:bg-red-700 font-semibold text-sm text-white shadow-lg shadow-red-600/30 transition active:scale-95"
                                 >
                                     Unlock Lifetime Pass for $4.99
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -365,12 +459,13 @@
                                     Lifetime Pro Active
                                 </span>
                             ) : (
-                                <a
-                                    href={CREEM_PAYMENT_URL}
+                                <button
+                                    type="button"
+                                    onClick={openAccessModal}
                                     className="px-4 py-2 rounded-full bg-china-red text-white text-xs sm:text-sm font-semibold hover:bg-red-700 transition-all shadow-lg shadow-red-600/30 active:scale-95"
                                 >
                                     Get Pro Pass ($4.99)
-                                </a>
+                                </button>
                             )}
                         </div>
                     </header>
@@ -500,6 +595,68 @@
                             <a href="/blog/taobao-size-chart.html" className="text-red-500 hover:underline">📖 Read our full Taobao Size Chart Guide</a>
                         </p>
                     </section>
+
+                    {showAccessModal && (
+                        <div
+                            className="early-access-overlay fixed inset-0 z-[100] flex items-center justify-center p-4"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="early-access-title"
+                        >
+                            <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={closeAccessModal}></div>
+                            <div className="early-access-modal relative w-full max-w-md rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/95 via-zinc-950/95 to-black/95 p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+                                <button
+                                    type="button"
+                                    onClick={closeAccessModal}
+                                    className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                    aria-label="Close"
+                                >
+                                    ✕
+                                </button>
+                                {accessStatus === 'success' ? (
+                                    <div className="text-center py-6">
+                                        <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-2xl">✓</div>
+                                        <h2 id="early-access-title" className="text-2xl font-extrabold text-white mb-2">Success!</h2>
+                                        <p className="text-sm text-slate-300 leading-relaxed">We've sent your exclusive access link.</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h2 id="early-access-title" className="text-2xl sm:text-[1.7rem] font-extrabold text-white mb-3 leading-tight">
+                                            🎉 Early Access Special
+                                        </h2>
+                                        <p className="text-sm text-slate-300 leading-relaxed mb-6">
+                                            We are upgrading our checkout system. Enter your email below to get Free Pro Access for your first month!
+                                        </p>
+                                        <form onSubmit={handleAccessSubmit} className="space-y-3">
+                                            <label htmlFor="early-access-email" className="sr-only">Email</label>
+                                            <input
+                                                id="early-access-email"
+                                                type="email"
+                                                required
+                                                autoComplete="email"
+                                                autoFocus
+                                                value={accessEmail}
+                                                onChange={(e) => {
+                                                    setAccessEmail(e.target.value);
+                                                    if (accessError) setAccessError('');
+                                                }}
+                                                placeholder="you@email.com"
+                                                className="w-full rounded-xl bg-black/55 border border-white/15 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/40"
+                                            />
+                                            {accessError && <p className="text-xs text-red-400">{accessError}</p>}
+                                            <button
+                                                type="submit"
+                                                disabled={accessStatus === 'submitting'}
+                                                className="w-full py-3 rounded-xl bg-china-red hover:bg-red-700 disabled:opacity-70 font-semibold text-sm text-white shadow-lg shadow-red-600/30 transition active:scale-[0.98]"
+                                            >
+                                                {accessStatus === 'submitting' ? 'Sending…' : 'Get Free Pro'}
+                                            </button>
+                                        </form>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <footer className="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
                         <p className="mb-3">
