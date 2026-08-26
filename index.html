@@ -159,16 +159,29 @@
                 return null;
             }, []);
 
+            const PRO_TOKEN = 'pro_pass_2026';
+
+            const activateProAccess = () => {
+                try {
+                    localStorage.setItem('chinafit_pro_token', PRO_TOKEN);
+                    localStorage.setItem('isPro', 'true');
+                } catch (err) {
+                    console.error('Could not persist Pro access:', err);
+                }
+                setIsProUser(true);
+            };
+
             useEffect(() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const paidToken = urlParams.get('paid');
+                const storedToken = localStorage.getItem('chinafit_pro_token');
+                const storedIsPro = localStorage.getItem('isPro') === 'true';
 
-                if (paidToken === 'pro_pass_2026') {
-                    localStorage.setItem('chinafit_pro_token', 'pro_pass_2026');
-                    setIsProUser(true);
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } else if (localStorage.getItem('chinafit_pro_token') === 'pro_pass_2026') {
-                    setIsProUser(true);
+                if (paidToken === PRO_TOKEN || storedToken === PRO_TOKEN || storedIsPro) {
+                    activateProAccess();
+                    if (paidToken === PRO_TOKEN) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
                 }
             }, []);
 
@@ -225,12 +238,22 @@
                     }
 
                     recordEmailLocally(email);
+                    activateProAccess();
                     setAccessStatus('success');
                 } catch (err) {
                     recordEmailLocally(email, { pendingSync: true });
+                    activateProAccess();
                     setAccessStatus('success');
                 }
             };
+
+            useEffect(() => {
+                if (accessStatus !== 'success') return undefined;
+                const timer = setTimeout(() => {
+                    closeAccessModal();
+                }, 1000);
+                return () => clearTimeout(timer);
+            }, [accessStatus]);
 
             useEffect(() => {
                 if (!showAccessModal) return;
@@ -258,6 +281,34 @@
                 setSellerMsgCopied(false);
             };
 
+            const requestSizing = async () => {
+                const token = localStorage.getItem('chinafit_pro_token') || '';
+                let payload;
+                if (activeTab === 'shoes') {
+                    payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
+                } else if (activeTab === 'tops') {
+                    payload = { category: 'tops', height: inputVal1, weight: inputVal2 };
+                } else {
+                    payload = { category: 'pants', height: inputVal1, waist: inputVal2 };
+                }
+
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-premium-token': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || `HTTP ${response.status}`);
+                }
+
+                return response.json();
+            };
+
             const handleCalculate = async (e) => {
                 e.preventDefault();
                 setLoading(true);
@@ -266,33 +317,8 @@
                 setCopied(false);
                 setSellerMsgCopied(false);
 
-                const token = localStorage.getItem('chinafit_pro_token') || '';
-
                 try {
-                    let payload;
-                    if (activeTab === 'shoes') {
-                        payload = { category: 'shoes', footLength: inputVal1, footWidth: inputVal2 };
-                    } else if (activeTab === 'tops') {
-                        payload = { category: 'tops', height: inputVal1, weight: inputVal2 };
-                    } else {
-                        payload = { category: 'pants', height: inputVal1, waist: inputVal2 };
-                    }
-
-                    const response = await fetch('/api/calculate', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-premium-token': token
-                        },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(errData.error || `HTTP ${response.status}`);
-                    }
-
-                    const data = await response.json();
+                    const data = await requestSizing();
                     setResult(data);
                 } catch (err) {
                     console.error('Request failed:', err);
@@ -301,6 +327,22 @@
                     setLoading(false);
                 }
             };
+
+            useEffect(() => {
+                if (!isProUser || !result || result.isPro || loading) return undefined;
+                let cancelled = false;
+
+                (async () => {
+                    try {
+                        const data = await requestSizing();
+                        if (!cancelled) setResult(data);
+                    } catch (err) {
+                        console.error('Pro unlock refresh failed:', err);
+                    }
+                })();
+
+                return () => { cancelled = true; };
+            }, [isProUser]);
 
             const copyReport = () => {
                 if (result && result.proAnalysis) {
@@ -565,6 +607,10 @@
                                                     </div>
                                                 )}
                                             </>
+                                        ) : isProUser ? (
+                                            <div className="rounded-xl border border-slate-700 bg-slate-800/40 p-6 text-center text-sm text-slate-400">
+                                                Unlocking full AI report…
+                                            </div>
                                         ) : (
                                             renderPreview()
                                         )}
@@ -617,7 +663,7 @@
                                     <div className="text-center py-6">
                                         <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-2xl">✓</div>
                                         <h2 id="early-access-title" className="text-2xl font-extrabold text-white mb-2">Success!</h2>
-                                        <p className="text-sm text-slate-300 leading-relaxed">We've sent your exclusive access link.</p>
+                                        <p className="text-sm text-slate-300 leading-relaxed">Pro access is unlocked. Enjoy the full calculator.</p>
                                     </div>
                                 ) : (
                                     <>
