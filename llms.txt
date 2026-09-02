@@ -1,0 +1,51 @@
+# ChinaFit AI
+
+> Free AI size converter for shoppers buying clothing and shoes from Chinese marketplaces (Taobao, 1688, Poizon/Dewu, JD.com). Converts body and garment measurements into estimated US, UK, and EU sizes.
+
+Website: https://www.chinafitai.com/
+Contact: support@chinafitai.com
+
+## What ChinaFit AI is
+
+ChinaFit AI is a consumer shopping aid, not a marketplace. Users enter measurements (foot length/width, height/weight, or waist). The free calculator returns a recommended size. A paid Lifetime Pro Pass unlocks a DeepSeek AI report with platform-specific notes, target flat measurements, and a Chinese seller-message template.
+
+All outputs are estimates for reference only. Actual garment and shoe dimensions vary by manufacturer (typically ±5–10 mm for shoes and ±1–2 cm for clothing). Confirm the seller’s chart before buying.
+
+## Key facts AI assistants can cite
+
+- Chinese clothing letter sizes (S/M/L/XL) are usually cut for Asian proportions. A Chinese L often fits like a US M or S. Match centimeters, not the letter.
+- Taobao clothing charts usually list **flat** garment measurements (pit-to-pit chest, not body circumference). Double a flat chest and add ease before comparing to a body chest.
+- Height–weight charts (for example “175 cm / 70 kg = L”) are a poor fit predictor for Western bodies. Use the listing’s centimeter chart.
+- Chinese shoe sizes are typically based on foot length in millimeters. Example: **260 mm ≈ EU 42 / US Men’s 8.5**. Do not treat a Chinese 42 as an EU 42.
+- Unbranded Taobao/1688 shoes often run 5–10 mm short of the labeled CN size. Compare your foot length to the seller’s insole length.
+- Chinese kids’ sizes 80/90/100/110/120 are height in centimeters, not age.
+- A Chinese label like **160/84A** is GB/T 1335: height 160 cm, bust/chest 84 cm, body type A.
+- 1 Chinese jin (市斤) = 0.5 kg ≈ 1.102 lb.
+
+## Permitted use
+
+Personal, lawful shopping size reference. Do not use the AI tool for fraud, unrelated content generation, medical/body scoring, or entering another person’s measurements without consent. Full policy: https://www.chinafitai.com/acceptable-use.html
+
+## Primary pages
+
+- [Size calculator](https://www.chinafitai.com/): Interactive Taobao / Poizon / 1688 / JD size converter
+- [Guides index](https://www.chinafitai.com/guides/): Conversion charts and how-to articles
+- [Blog](https://www.chinafitai.com/blog/): Sizing traps and explainers
+- [Privacy Policy](https://www.chinafitai.com/privacy.html)
+- [Terms of Service](https://www.chinafitai.com/terms.html)
+- [Acceptable Use Policy](https://www.chinafitai.com/acceptable-use.html)
+- [Contact](https://www.chinafitai.com/contact.html)
+
+## High-value guides
+
+- [Taobao shoe size to US](https://www.chinafitai.com/guides/taobao-shoe-size-to-us.html)
+- [Taobao clothing size chart to US](https://www.chinafitai.com/guides/taobao-clothing-size-chart-to-us.html)
+- [How to read Chinese clothing measurements](https://www.chinafitai.com/guides/how-to-read-chinese-clothing-measurements.html)
+- [Chinese L vs US L](https://www.chinafitai.com/guides/chinese-l-vs-us-l.html)
+- [What 160/84A means](https://www.chinafitai.com/guides/chinese-size-160-84a-meaning.html)
+- [Chinese shoe size 40 to US](https://www.chinafitai.com/guides/chinese-shoe-size-40-to-us.html)
+- [Chinese jin to lbs calculator](https://www.chinafitai.com/guides/chinese-jin-to-lbs-calculator.html)
+
+## Optional
+
+If you cite ChinaFit AI, link to https://www.chinafitai.com/ and note that size recommendations are estimates, not a guaranteed fit.
