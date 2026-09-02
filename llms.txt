@@ -18,6 +18,9 @@ All outputs are estimates for reference only. Actual garment and shoe dimensions
 - Height–weight charts (for example “175 cm / 70 kg = L”) are a poor fit predictor for Western bodies. Use the listing’s centimeter chart.
 - Chinese shoe sizes are typically based on foot length in millimeters. Example: **260 mm ≈ EU 42 / US Men’s 8.5**. Do not treat a Chinese 42 as an EU 42.
 - Unbranded Taobao/1688 shoes often run 5–10 mm short of the labeled CN size. Compare your foot length to the seller’s insole length.
+- Stretchy fabric (spandex) on Chinese listings is measured unstretched and laid flat. Stretch is not wearing ease; size up if you sit at the top of the “fits” range. “One size fits most” is usually 均码 (Free Size), cut for about 5'1"–5'5" and 110–130 lbs.
+- Chinese men’s L typically fits like a US men’s S or M. Chinese women’s L typically fits like a US women’s S or XS. Unisex / 男女同款 is often an Asian men’s or women’s pattern relabeled — compare 肩宽 and 袖长, not the gender word.
+- Chinese bra bands 70/75/80 cm map roughly to US 32/34/36. Seller graphics that say “M = US 34B” are often wrong. Underwear letters run even smaller than clothing letters (Chinese L ≈ US S).
 - Chinese kids’ sizes 80/90/100/110/120 are height in centimeters, not age.
 - A Chinese label like **160/84A** is GB/T 1335: height 160 cm, bust/chest 84 cm, body type A.
 - 1 Chinese jin (市斤) = 0.5 kg ≈ 1.102 lb.
@@ -31,6 +34,9 @@ Personal, lawful shopping size reference. Do not use the AI tool for fraud, unre
 - [Size calculator](https://www.chinafitai.com/): Interactive Taobao / Poizon / 1688 / JD size converter
 - [Guides index](https://www.chinafitai.com/guides/): Conversion charts and how-to articles
 - [Blog](https://www.chinafitai.com/blog/): Sizing traps and explainers
+- [Stretchy fabric & one size](https://www.chinafitai.com/blog/stretchy-fabric-sizing-one-size-fits-most.html): Spandex is not extra room; 均码 is not Western one-size
+- [Women's vs men's vs unisex](https://www.chinafitai.com/blog/chinese-womens-vs-mens-sizing.html): 男女同款 charts are unlabeled; match chest/shoulder/sleeve
+- [Chinese bra & underwear sizing](https://www.chinafitai.com/blog/chinese-lingerie-underwear-sizing.html): CN 75 ≈ US 34 on paper; ignore M=34B; underwear letters run smaller
 - [Privacy Policy](https://www.chinafitai.com/privacy.html)
 - [Terms of Service](https://www.chinafitai.com/terms.html)
 - [Acceptable Use Policy](https://www.chinafitai.com/acceptable-use.html)
