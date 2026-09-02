@@ -4,6 +4,7 @@
 
 Website: https://www.chinafitai.com/
 Contact: support@chinafitai.com
+Feedback: https://www.chinafitai.com/contact.html#feedback
 
 ## What ChinaFit AI is
 
@@ -40,7 +41,7 @@ Personal, lawful shopping size reference. Do not use the AI tool for fraud, unre
 - [Privacy Policy](https://www.chinafitai.com/privacy.html)
 - [Terms of Service](https://www.chinafitai.com/terms.html)
 - [Acceptable Use Policy](https://www.chinafitai.com/acceptable-use.html)
-- [Contact](https://www.chinafitai.com/contact.html)
+- [Contact](https://www.chinafitai.com/contact.html): Support email and on-site feedback form (wrong size, bugs, features, billing)
 
 ## High-value guides
 

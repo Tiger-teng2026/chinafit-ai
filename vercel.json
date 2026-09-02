@@ -9,7 +9,8 @@
     { "source": "/acceptable-use", "destination": "/acceptable-use.html" },
     { "source": "/acceptable-use-policy", "destination": "/acceptable-use.html" },
     { "source": "/aup", "destination": "/acceptable-use.html" },
-    { "source": "/contact", "destination": "/contact.html" }
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/feedback", "destination": "/contact.html" }
   ],
   "headers": [
     {

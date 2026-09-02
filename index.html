@@ -182,6 +182,12 @@
                 from { opacity: 0; transform: translateY(14px) scale(0.96); }
                 to { opacity: 1; transform: translateY(0) scale(1); }
             }
+            .feedback-fab {
+                position: fixed;
+                right: 1rem;
+                bottom: 1.25rem;
+                z-index: 40;
+            }
         </style>
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -196,6 +202,7 @@
                 <a href="/terms.html" class="hover:text-white underline">Terms of Service</a>
                 <a href="/acceptable-use.html" class="hover:text-white underline">Acceptable Use Policy</a>
                 <a href="/contact.html" class="hover:text-white underline">Contact</a>
+                <a href="/contact.html#feedback" class="hover:text-white underline">Feedback</a>
             </nav>
             <p class="text-slate-400">
                 Customer support:
@@ -299,6 +306,7 @@
             <a href="/terms.html" class="text-slate-400 hover:text-white underline">Terms of Service</a>
             <a href="/acceptable-use.html" class="text-slate-400 hover:text-white underline">Acceptable Use Policy</a>
             <a href="/contact.html" class="text-slate-400 hover:text-white underline">Contact</a>
+            <a href="/contact.html#feedback" class="text-slate-400 hover:text-white underline">Feedback</a>
         </div>
         <p>© 2026 ChinaFit AI · Built with React &amp; DeepSeek Engine</p>
         <p class="text-[11px] text-slate-600 mt-2 max-w-xl mx-auto px-4">
@@ -325,6 +333,14 @@
             const [accessEmail, setAccessEmail] = useState('');
             const [accessStatus, setAccessStatus] = useState('idle');
             const [accessError, setAccessError] = useState('');
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [feedbackCategory, setFeedbackCategory] = useState('wrong_size');
+            const [feedbackEmail, setFeedbackEmail] = useState('');
+            const [feedbackMessage, setFeedbackMessage] = useState('');
+            const [feedbackCompany, setFeedbackCompany] = useState('');
+            const [feedbackStatus, setFeedbackStatus] = useState('idle');
+            const [feedbackError, setFeedbackError] = useState('');
+            const [helpfulVote, setHelpfulVote] = useState('');
 
             const converter = useMemo(() => {
                 if (window.showdown) {
@@ -378,6 +394,58 @@
                 setAccessStatus('idle');
                 setAccessError('');
                 setShowAccessModal(true);
+            };
+
+            const closeFeedback = () => {
+                setShowFeedback(false);
+                setFeedbackStatus('idle');
+                setFeedbackError('');
+            };
+
+            const openFeedback = (category) => {
+                setFeedbackCategory(category || 'wrong_size');
+                setFeedbackStatus('idle');
+                setFeedbackError('');
+                setShowFeedback(true);
+            };
+
+            const handleFeedbackSubmit = async (e) => {
+                e.preventDefault();
+                const message = feedbackMessage.trim();
+                const email = feedbackEmail.trim().toLowerCase();
+
+                if (message.length < 10) {
+                    setFeedbackError('Please describe the issue in at least 10 characters.');
+                    setFeedbackStatus('error');
+                    return;
+                }
+
+                setFeedbackStatus('submitting');
+                setFeedbackError('');
+
+                try {
+                    const response = await fetch('/api/feedback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            category: feedbackCategory,
+                            email,
+                            message,
+                            company: feedbackCompany,
+                            page: window.location.pathname + (activeTab ? `?tab=${activeTab}` : '')
+                        })
+                    });
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Could not send feedback.');
+                    }
+                    setFeedbackMessage('');
+                    setFeedbackEmail('');
+                    setFeedbackStatus('success');
+                } catch (err) {
+                    setFeedbackError(err.message || 'Could not send feedback. Email support@chinafitai.com instead.');
+                    setFeedbackStatus('error');
+                }
             };
 
             const recordEmailLocally = (email, extra = {}) => {
@@ -451,6 +519,20 @@
                 };
             }, [showAccessModal]);
 
+            useEffect(() => {
+                if (!showFeedback) return;
+                const previousOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+                const onKeyDown = (event) => {
+                    if (event.key === 'Escape') closeFeedback();
+                };
+                window.addEventListener('keydown', onKeyDown);
+                return () => {
+                    document.body.style.overflow = previousOverflow;
+                    window.removeEventListener('keydown', onKeyDown);
+                };
+            }, [showFeedback]);
+
             const handleTabChange = (tab, val1, val2) => {
                 setActiveTab(tab);
                 setInputVal1(val1);
@@ -459,6 +541,7 @@
                 setErrorMsg('');
                 setCopied(false);
                 setSellerMsgCopied(false);
+                setHelpfulVote('');
             };
 
             const requestSizing = async () => {
@@ -676,7 +759,8 @@
                                 <span className="text-xl font-bold tracking-tight text-white">ChinaFit <span className="china-red">AI</span></span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <a href="mailto:support@chinafitai.com" className="hidden md:inline text-xs text-slate-400 hover:text-white underline">support@chinafitai.com</a>
+                                <a href="/contact.html#feedback" className="hidden md:inline text-xs text-slate-400 hover:text-white underline">Feedback</a>
+                                <a href="mailto:support@chinafitai.com" className="hidden lg:inline text-xs text-slate-400 hover:text-white underline">support@chinafitai.com</a>
                                 {isProUser ? (
                                     <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                                         <span className="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span>
@@ -751,6 +835,15 @@
                                             <p className="text-sm text-slate-400 mt-2">{result.baseResult?.quickTip}</p>
                                             {result.baseResult?.confidence && (
                                                 <p className="text-xs text-slate-500 mt-1 font-medium">Confidence: {result.baseResult.confidence}</p>
+                                            )}
+                                            {helpfulVote === 'yes' ? (
+                                                <p className="mt-4 pt-3 border-t border-slate-800 text-xs text-emerald-400">Thanks — that helps us improve the converter.</p>
+                                            ) : (
+                                                <div className="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center gap-2">
+                                                    <span className="text-xs text-slate-500">Was this size helpful?</span>
+                                                    <button type="button" onClick={() => setHelpfulVote('yes')} className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Yes</button>
+                                                    <button type="button" onClick={() => openFeedback('wrong_size')} className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">No — report it</button>
+                                                </div>
                                             )}
                                         </div>
 
@@ -863,6 +956,95 @@
                             </div>
                         </div>
                     )}
+                    {showFeedback && (
+                        <div
+                            className="early-access-overlay fixed inset-0 z-[100] flex items-center justify-center p-4"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="feedback-title"
+                        >
+                            <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={closeFeedback}></div>
+                            <div className="early-access-modal relative w-full max-w-md rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/95 via-zinc-950/95 to-black/95 p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+                                <button
+                                    type="button"
+                                    onClick={closeFeedback}
+                                    className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                    aria-label="Close feedback"
+                                >
+                                    ✕
+                                </button>
+                                {feedbackStatus === 'success' ? (
+                                    <div className="text-center py-6">
+                                        <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-2xl">✓</div>
+                                        <h2 id="feedback-title" className="text-2xl font-extrabold text-white mb-2">Thanks</h2>
+                                        <p className="text-sm text-slate-300 leading-relaxed">We received your feedback. If you left an email, we typically reply within 2 business days.</p>
+                                        <button type="button" onClick={closeFeedback} className="mt-5 px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-white">Close</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h2 id="feedback-title" className="text-2xl font-extrabold text-white mb-2">Send feedback</h2>
+                                        <p className="text-sm text-slate-400 leading-relaxed mb-5">Wrong size, a bug, or a feature you want. No live chat — this goes to support.</p>
+                                        <form onSubmit={handleFeedbackSubmit} className="space-y-3">
+                                            <div className="absolute -left-[9999px] h-0 overflow-hidden" aria-hidden="true">
+                                                <label htmlFor="feedback-company">Company</label>
+                                                <input id="feedback-company" type="text" tabIndex="-1" autoComplete="off" value={feedbackCompany} onChange={(e) => setFeedbackCompany(e.target.value)} />
+                                            </div>
+                                            <label htmlFor="feedback-category" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Topic</label>
+                                            <select
+                                                id="feedback-category"
+                                                value={feedbackCategory}
+                                                onChange={(e) => setFeedbackCategory(e.target.value)}
+                                                className="w-full rounded-xl bg-black/55 border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                                            >
+                                                <option value="wrong_size">Wrong size recommendation</option>
+                                                <option value="feature">Feature request</option>
+                                                <option value="bug">Bug or site issue</option>
+                                                <option value="billing">Billing / Pro Pass</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                            <label htmlFor="feedback-email-field" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Email (optional)</label>
+                                            <input
+                                                id="feedback-email-field"
+                                                type="email"
+                                                autoComplete="email"
+                                                value={feedbackEmail}
+                                                onChange={(e) => setFeedbackEmail(e.target.value)}
+                                                placeholder="you@email.com"
+                                                className="w-full rounded-xl bg-black/55 border border-white/15 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                                            />
+                                            <label htmlFor="feedback-message-field" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Message</label>
+                                            <textarea
+                                                id="feedback-message-field"
+                                                required
+                                                minLength="10"
+                                                maxLength="2000"
+                                                rows="4"
+                                                value={feedbackMessage}
+                                                onChange={(e) => setFeedbackMessage(e.target.value)}
+                                                placeholder="What should we fix or add?"
+                                                className="w-full rounded-xl bg-black/55 border border-white/15 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-y"
+                                            />
+                                            {feedbackError && <p className="text-xs text-red-400">{feedbackError}</p>}
+                                            <button
+                                                type="submit"
+                                                disabled={feedbackStatus === 'submitting'}
+                                                className="w-full py-3 rounded-xl bg-china-red hover:bg-red-700 disabled:opacity-70 font-semibold text-sm text-white shadow-lg shadow-red-600/30 transition active:scale-[0.98]"
+                                            >
+                                                {feedbackStatus === 'submitting' ? 'Sending…' : 'Send feedback'}
+                                            </button>
+                                        </form>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => openFeedback('other')}
+                        className="feedback-fab inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900 border border-slate-700 text-sm font-semibold text-white shadow-lg shadow-black/40 hover:border-red-500/50 hover:bg-slate-800 transition"
+                    >
+                        Feedback
+                    </button>
                 </div>
             );
         }
