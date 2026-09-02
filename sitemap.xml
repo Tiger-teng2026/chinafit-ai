@@ -43,8 +43,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.chinafitai.com/guides/</loc>
-    <lastmod>2026-08-27</lastmod>
+    <loc>https://www.chinafitai.com/guides</loc>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -139,7 +139,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.chinafitai.com/blog/</loc>
+    <loc>https://www.chinafitai.com/blog</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

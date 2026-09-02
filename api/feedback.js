@@ -217,13 +217,13 @@ module.exports = async function handler(req, res) {
             const cfg = configStatus();
             console.error('feedback not delivered', cfg);
             return res.status(503).json({
-                error: 'Could not deliver feedback email yet. Please email support@chinafitai.com.'
+                error: 'Could not deliver feedback email yet. Please use the contact form at /contact.html#feedback.'
             });
         }
 
         return res.status(200).json({ ok: true });
     } catch (err) {
         console.error('feedback handler failed:', err);
-        return res.status(500).json({ error: 'Could not send feedback. Please email support@chinafitai.com.' });
+        return res.status(500).json({ error: 'Could not send feedback. Please use the contact form at /contact.html#feedback.' });
     }
 };

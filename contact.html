@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact &amp; Customer Support - ChinaFit AI</title>
-    <meta name="description" content="Contact ChinaFit AI customer support. Email support@chinafitai.com for payment, Pro Pass, sizing, privacy, or refund questions.">
+    <meta name="description" content="Contact ChinaFit AI. Use the on-site form for payment, Pro Pass, sizing, privacy, or refund questions. Official support address: support@chinafitai.com.">
     <link rel="canonical" href="https://www.chinafitai.com/contact.html" />
     <meta property="og:image" content="https://www.chinafitai.com/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -70,16 +70,8 @@
         <p class="text-sm text-slate-500 mb-8">We typically reply within 2 business days. Last updated: September 3, 2026</p>
 
         <article class="legal-content">
-            <div class="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 mb-8">
-                <p class="text-slate-400 text-sm mb-2">Customer support email</p>
-                <p class="text-2xl sm:text-3xl font-bold text-white mb-2">
-                    <a href="mailto:support@chinafitai.com">support@chinafitai.com</a>
-                </p>
-                <p class="mb-0">This is the official support address for ChinaFit AI. You can email us, or use the form below. We do not use live chat.</p>
-            </div>
-
-            <h2 id="feedback">Send feedback</h2>
-            <p>Report a wrong size, a bug, or a feature you want. Leave an email if you want a reply. We typically respond within 2 business days.</p>
+            <h2 id="feedback">Send a message</h2>
+            <p>This form is the fastest way to reach the founder. Use it for a wrong size, a bug, billing, a feature request, or a privacy question. Leave your email if you want a reply. We typically respond within 2 business days. We do not use live chat.</p>
             <form id="feedback-form" class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 mb-8 space-y-4 relative">
                 <div class="hp-field" aria-hidden="true">
                     <label for="feedback-company">Company</label>
@@ -107,6 +99,12 @@
                 <button id="feedback-submit" type="submit" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-china-red hover:bg-red-700 text-white font-semibold text-sm shadow-lg shadow-red-600/30 transition disabled:opacity-60">Send feedback</button>
             </form>
 
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 mb-8">
+                <p class="text-slate-400 text-sm mb-2">Official support address</p>
+                <p class="text-2xl sm:text-3xl font-bold text-white mb-2 select-all">support@chinafitai.com</p>
+                <p class="mb-0">This branded address stays on the site for trust, receipts, and legal notices. Clicking it on other pages opens this form, which is how messages actually arrive.</p>
+            </div>
+
             <h2>What we can help with</h2>
             <ul>
                 <li>Lifetime Pro Pass purchases, checkout with Creem, and restoring access after payment</li>
@@ -127,12 +125,12 @@
             </ul>
 
             <h2>Business details</h2>
-            <p><strong>ChinaFit AI</strong><br>Website: <a href="https://www.chinafitai.com/">https://www.chinafitai.com</a><br>Email: <a href="mailto:support@chinafitai.com">support@chinafitai.com</a></p>
+            <p><strong>ChinaFit AI</strong><br>Website: <a href="https://www.chinafitai.com/">https://www.chinafitai.com</a><br>Email: support@chinafitai.com<br>Contact form: <a href="/contact.html#feedback">https://www.chinafitai.com/contact.html#feedback</a></p>
         </article>
     </main>
 
     <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
-        <p class="mb-3">Need help? <a href="mailto:support@chinafitai.com" class="text-slate-300 hover:text-white underline">support@chinafitai.com</a></p>
+        <p class="mb-3">Need help? <a href="/contact.html#feedback" class="text-slate-300 hover:text-white underline">support@chinafitai.com</a></p>
         <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-3">
             <a href="/privacy.html" class="text-slate-400 hover:text-white underline">Privacy Policy</a>
             <a href="/terms.html" class="text-slate-400 hover:text-white underline">Terms of Service</a>
@@ -207,7 +205,7 @@
                     statusEl.className = 'text-sm text-emerald-400';
                     form.reset();
                 } catch (err) {
-                    statusEl.textContent = (err && err.message) || 'Could not send feedback. Email support@chinafitai.com instead.';
+                    statusEl.textContent = (err && err.message) || 'Could not send feedback. Please try the contact form again.';
                     statusEl.className = 'text-sm text-red-400';
                 } finally {
                     submitBtn.disabled = false;

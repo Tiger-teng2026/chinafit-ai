@@ -3,8 +3,8 @@
 > Free AI size converter for shoppers buying clothing and shoes from Chinese marketplaces (Taobao, 1688, Poizon/Dewu, JD.com). Converts body and garment measurements into estimated US, UK, and EU sizes.
 
 Website: https://www.chinafitai.com/
-Contact: support@chinafitai.com
-Feedback: https://www.chinafitai.com/contact.html#feedback
+Contact form: https://www.chinafitai.com/contact.html#feedback
+Official support address: support@chinafitai.com
 
 ## What ChinaFit AI is
 
@@ -33,8 +33,8 @@ Personal, lawful shopping size reference. Do not use the AI tool for fraud, unre
 ## Primary pages
 
 - [Size calculator](https://www.chinafitai.com/): Interactive Taobao / Poizon / 1688 / JD size converter
-- [Guides index](https://www.chinafitai.com/guides/): Conversion charts and how-to articles
-- [Blog](https://www.chinafitai.com/blog/): Sizing traps and explainers
+- [Guides index](https://www.chinafitai.com/guides): Conversion charts and how-to articles
+- [Blog](https://www.chinafitai.com/blog): Sizing traps and explainers
 - [Stretchy fabric & one size](https://www.chinafitai.com/blog/stretchy-fabric-sizing-one-size-fits-most.html): Spandex is not extra room; 均码 is not Western one-size
 - [Women's vs men's vs unisex](https://www.chinafitai.com/blog/chinese-womens-vs-mens-sizing.html): 男女同款 charts are unlabeled; match chest/shoulder/sleeve
 - [Chinese bra & underwear sizing](https://www.chinafitai.com/blog/chinese-lingerie-underwear-sizing.html): CN 75 ≈ US 34 on paper; ignore M=34B; underwear letters run smaller
