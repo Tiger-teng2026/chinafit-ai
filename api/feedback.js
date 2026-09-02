@@ -56,7 +56,7 @@ async function sendResend(record) {
             },
             body: JSON.stringify({
                 from: process.env.RESEND_FROM || 'ChinaFit AI <onboarding@resend.dev>',
-                to: [process.env.FEEDBACK_TO || SUPPORT_TO],
+                to: [notifyEmail() || SUPPORT_TO],
                 reply_to: record.email || undefined,
                 subject: `[ChinaFit AI] ${record.category}`,
                 text: [
@@ -82,9 +82,27 @@ async function sendResend(record) {
     }
 }
 
+function notifyEmail() {
+    return String(process.env.FEEDBACK_TO || '').trim();
+}
+
+function isCloudflareForwardedAlias(email) {
+    return String(email || '').trim().toLowerCase() === SUPPORT_TO;
+}
+
 async function sendFormSubmit(record) {
+    const to = notifyEmail();
+
+    // support@chinafitai.com is Cloudflare Email Routing → Outlook.
+    // Outlook often silently drops that hop (SPF / Cloudflare IP reputation).
+    // Only send when FEEDBACK_TO is the real Outlook inbox.
+    if (!to || isCloudflareForwardedAlias(to)) {
+        console.error('feedback skip FormSubmit: set FEEDBACK_TO to the Outlook address, not support@chinafitai.com');
+        return false;
+    }
+
     try {
-        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(SUPPORT_TO)}`, {
+        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -185,12 +203,16 @@ module.exports = async function handler(req, res) {
 
         console.log('[FEEDBACK]', JSON.stringify(record));
 
+        if (!notifyEmail()) {
+            console.error('feedback not emailed: add Vercel env FEEDBACK_TO with your Outlook address (not support@chinafitai.com)');
+        }
+
         let delivered = await sendResend(record);
         if (!delivered) delivered = await sendWebhook(record);
         if (!delivered) delivered = await sendFormSubmit(record);
 
         if (!delivered) {
-            console.error('feedback stored in logs only; email delivery did not succeed');
+            console.error('feedback stored in Vercel logs only; email delivery did not succeed');
         }
 
         return res.status(200).json({ ok: true });
