@@ -409,6 +409,42 @@
                 setShowFeedback(true);
             };
 
+            const submitFeedbackPayload = async ({ category, email, message, company, page }) => {
+                if (company) return;
+                const cfg = await fetch('/api/feedback').then((r) => r.json()).catch(() => ({}));
+                const text = `Category: ${category}\nFrom: ${email || '(not provided)'}\nPage: ${page}\n\n${message}`;
+
+                if (cfg.web3formsKey) {
+                    const res = await fetch('https://api.web3forms.com/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        body: JSON.stringify({
+                            access_key: cfg.web3formsKey,
+                            subject: `[ChinaFit AI] ${category}`,
+                            from_name: 'ChinaFit AI',
+                            name: email || 'ChinaFit visitor',
+                            email: email || 'noreply@chinafitai.com',
+                            message: text
+                        })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || data.success === false) {
+                        throw new Error(data.message || 'Could not send feedback.');
+                    }
+                    return;
+                }
+
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, email, message, company, page })
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.error || 'Could not send feedback.');
+                }
+            };
+
             const handleFeedbackSubmit = async (e) => {
                 e.preventDefault();
                 const message = feedbackMessage.trim();
@@ -424,21 +460,13 @@
                 setFeedbackError('');
 
                 try {
-                    const response = await fetch('/api/feedback', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            category: feedbackCategory,
-                            email,
-                            message,
-                            company: feedbackCompany,
-                            page: window.location.pathname + (activeTab ? `?tab=${activeTab}` : '')
-                        })
+                    await submitFeedbackPayload({
+                        category: feedbackCategory,
+                        email,
+                        message,
+                        company: feedbackCompany,
+                        page: window.location.pathname + (activeTab ? `?tab=${activeTab}` : '')
                     });
-                    const data = await response.json().catch(() => ({}));
-                    if (!response.ok) {
-                        throw new Error(data.error || 'Could not send feedback.');
-                    }
                     setFeedbackMessage('');
                     setFeedbackEmail('');
                     setFeedbackStatus('success');

@@ -161,20 +161,47 @@
                 submitBtn.textContent = 'Sending…';
 
                 try {
-                    var response = await fetch('/api/feedback', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            category: category,
-                            email: email,
-                            message: message,
-                            company: company,
-                            page: window.location.pathname
-                        })
-                    });
-                    var data = await response.json().catch(function () { return {}; });
-                    if (!response.ok) {
-                        throw new Error(data.error || 'Could not send feedback.');
+                    if (company) {
+                        statusEl.textContent = 'Thanks — we received your message.';
+                        statusEl.className = 'text-sm text-emerald-400';
+                        form.reset();
+                        return;
+                    }
+                    var cfg = await fetch('/api/feedback').then(function (r) { return r.json(); }).catch(function () { return {}; });
+                    var text = 'Category: ' + category + '\nFrom: ' + (email || '(not provided)') + '\nPage: ' + window.location.pathname + '\n\n' + message;
+                    if (cfg.web3formsKey) {
+                        var w3 = await fetch('https://api.web3forms.com/submit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                            body: JSON.stringify({
+                                access_key: cfg.web3formsKey,
+                                subject: '[ChinaFit AI] ' + category,
+                                from_name: 'ChinaFit AI',
+                                name: email || 'ChinaFit visitor',
+                                email: email || 'noreply@chinafitai.com',
+                                message: text
+                            })
+                        });
+                        var w3data = await w3.json().catch(function () { return {}; });
+                        if (!w3.ok || w3data.success === false) {
+                            throw new Error(w3data.message || 'Could not send feedback.');
+                        }
+                    } else {
+                        var response = await fetch('/api/feedback', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                category: category,
+                                email: email,
+                                message: message,
+                                company: company,
+                                page: window.location.pathname
+                            })
+                        });
+                        var data = await response.json().catch(function () { return {}; });
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Could not send feedback.');
+                        }
                     }
                     statusEl.textContent = 'Thanks — we received your message.';
                     statusEl.className = 'text-sm text-emerald-400';

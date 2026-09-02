@@ -163,7 +163,8 @@ module.exports = async function handler(req, res) {
         const cfg = configStatus();
         return res.status(200).json({
             ok: true,
-            mailReady: cfg.resend || cfg.web3forms || cfg.webhook
+            mailReady: cfg.resend || cfg.web3forms || cfg.webhook,
+            web3formsKey: process.env.WEB3FORMS_ACCESS_KEY || null
         });
     }
 
@@ -210,7 +211,6 @@ module.exports = async function handler(req, res) {
         console.log('[FEEDBACK]', JSON.stringify(record));
 
         let delivered = await sendResend(record);
-        if (!delivered) delivered = await sendWeb3Forms(record);
         if (!delivered) delivered = await sendWebhook(record);
 
         if (!delivered) {
